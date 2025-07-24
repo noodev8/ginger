@@ -1,4 +1,15 @@
-# ginger Project Rules & Standards
+# SplitDine Project Rules & Standards
+
+## Tech Stack
+1. **Frontend**: Flutter
+2. **Backend**: Node.js, Express
+3. **Database**: PostgreSQL
+4. **Authentication**: JWT
+6. **Documentation**: Postman
+7. **Version Control**: Git
+8. **CI/CD**: GitHub Actions
+9. **Deployment**: VPS Server
+
 
 ## API Development Rules
 
@@ -11,9 +22,10 @@
 
 ### Authentication Rules
 1. **Use JWT Authentication** - JSON Web Tokens for secure authentication
-2. **Middleware location** - Use authentication middleware from "C:\ginger\ginger_server\middleware\auth.js"
+2. **Middleware location** - Use authentication middleware from "C:\noovos\noovos_server\middleware\auth.js"
 3. **Token validation** - All protected routes must validate JWT tokens
 4. **Secure token storage** - Store tokens securely on client side
+5. **Use bcrypt module** - For manageing passwords
 
 ### File Naming Rules
 1. **Always use lowercase** - All new files must use lowercase filenames
@@ -31,6 +43,12 @@
 1. **Header format required** - All API route files must include a standardized header
 2. **Complete specification** - Include method, purpose, request payload, success response, and return codes
 3. **Standard format** - Use the following template:
+
+### .env File Rules
+1. **Use .env file** - Store all environment variables in a .env file
+2. **Never commit .env file** - Do not commit the .env file to version control
+3. **Use environment variables** - Access environment variables using process.env.VARIABLE_NAME
+4. **Single env file** - Always only have one .env file and no others. No separate .env files for local or dev. Just a single .env file at project root
 
 ```
 =======================================================================================================================================
@@ -70,15 +88,13 @@ Return Codes:
 4. **Consistent formatting** - Follow established code formatting standards
 5. **No hardcoded values** - Use configuration files or environment variables
 
-## UI Rules
-1. Keep all UI themes in the same file for the screen - Do not use a centralized theme
-
 ### Database Rules
 1. **Use parameterized queries** - Prevent SQL injection attacks
 2. **Connection pooling** - Use connection pools for database connections
 3. **Transaction management** - Use transactions for multi-step operations
 4. **Index optimization** - Create appropriate indexes for query performance
 5. **Data validation** - Validate all input data before database operations
+6. **Connection** - Put all database connection details or template in .env file
 
 ### Security Rules
 1. **Input validation** - Validate and sanitize all user inputs
@@ -118,21 +134,6 @@ Return Codes:
 3. **Reference issues** - Reference issue numbers when applicable
 4. **Scope indication** - Indicate scope (frontend, backend, docs, etc.)
 
-## Deployment Rules
-
-### Environment Management
-1. **Environment separation** - Maintain separate dev, staging, and production environments
-2. **Configuration management** - Use environment variables for configuration
-3. **Secret management** - Never commit secrets or API keys to version control
-4. **Database migrations** - Use migration scripts for database schema changes
-5. **Backup procedures** - Implement regular backup procedures for production data
-
-### Release Management
-1. **Version tagging** - Tag releases with semantic versioning
-2. **Release notes** - Maintain detailed release notes
-3. **Rollback procedures** - Have rollback procedures for failed deployments
-4. **Testing before release** - Thoroughly test in staging before production release
-5. **Monitoring** - Monitor application performance and errors after deployment
 
 ## Communication Rules
 
@@ -181,4 +182,4 @@ Return Codes:
 4. **Root cause analysis** - Perform root cause analysis for critical issues
 5. **Prevention measures** - Implement measures to prevent recurring issues
 
-These rules ensure consistent, secure, and maintainable development practices across the ginger project.
+These rules ensure consistent, secure, and maintainable development practices across the SplitDine project.
