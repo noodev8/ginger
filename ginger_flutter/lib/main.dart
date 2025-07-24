@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'account_page.dart';
 import 'qr_scanner_page.dart';
 import 'rewards_page.dart';
+import 'login_page.dart';
+import 'providers/auth_provider.dart';
 
 
 
@@ -16,14 +19,82 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Ginger & Co Coffee',
-      debugShowCheckedModeBanner: false, // Remove debug banner
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFA0956B)),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (context) => AuthProvider(),
+      child: MaterialApp(
+        title: 'Ginger & Co Coffee',
+        debugShowCheckedModeBanner: false, // Remove debug banner
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFA0956B)),
+          useMaterial3: true,
+        ),
+        home: const AuthWrapper(),
       ),
-      home: const HomeWidget(),
+    );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize auth state when app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthProvider>(context, listen: false).initializeAuth();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Show loading screen while checking auth state
+        if (authProvider.isLoading) {
+          return const Scaffold(
+            backgroundColor: Color(0xFFF7EDE4),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(
+                    image: AssetImage('assets/logo.png'),
+                    width: 100,
+                    height: 100,
+                  ),
+                  SizedBox(height: 24),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading...',
+                    style: TextStyle(
+                      color: Color(0xFF8B7355),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Show login page if not authenticated
+        if (!authProvider.isAuthenticated) {
+          return const LoginPage();
+        }
+
+        // Show main app if authenticated
+        return const HomeWidget();
+      },
     );
   }
 }
@@ -199,7 +270,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // TODO: Implement actual logout logic
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                authProvider.logout();
               },
               child: const Text(
                 'Logout',

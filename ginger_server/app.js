@@ -2,11 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
+// Load environment variables first
+dotenv.config();
+
+// Import database service (this will test connection)
+const database = require('./services/database');
+
 // Import routes
 const augmentRoutes = require('./routes/augmentRoutes');
-
-// Load environment variables
-dotenv.config();
+const authRoutes = require('./routes/auth_routes');
 
 // Create Express app
 const app = express();
@@ -36,6 +40,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
+app.use('/auth', authRoutes);
 app.use('/augment', augmentRoutes);
 
 // 404 handler

@@ -139,12 +139,40 @@ class AugmentController {
 
     } catch (error) {
       console.error('Error in getServiceInfo controller:', error);
-      
+
       res.status(500).json({
         success: false,
         error: 'Internal server error',
         message: 'Failed to retrieve service information',
         timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Test endpoint following project rules
+   * POST /augment/test
+   */
+  async test(req, res) {
+    try {
+      const { message } = req.body;
+
+      res.status(200).json({
+        return_code: 'SUCCESS',
+        message: 'Augment API test successful',
+        data: {
+          timestamp: new Date().toISOString(),
+          status: 'active',
+          received_message: message || 'No message provided'
+        }
+      });
+
+    } catch (error) {
+      console.error('Error in test controller:', error);
+
+      res.status(500).json({
+        return_code: 'SERVER_ERROR',
+        message: 'Test endpoint failed'
       });
     }
   }
