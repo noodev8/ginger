@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'account_page.dart';
-import 'qr_scanner_page.dart';
 import 'rewards_page.dart';
 import 'login_page.dart';
 import 'providers/auth_provider.dart';
@@ -109,7 +109,6 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int _logoTapCount = 0;
-  bool _isStaffMode = false;
 
   void _showQRCodeDialog() {
     showDialog(
@@ -400,43 +399,80 @@ class _HomeWidgetState extends State<HomeWidget> {
 
 
   void _checkPin(String pin) {
-    if (pin.length == 3) {
-      if (pin == '111') {
-        Navigator.of(context).pop(); // Close pin dialog
-        setState(() {
-          _isStaffMode = true;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Staff mode activated'),
-            backgroundColor: Color(0xFF8B7355), // Darker beige
-          ),
-        );
-      } else {
-        Navigator.of(context).pop(); // Close pin dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid PIN'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    // PIN functionality removed - staff access now controlled by database
+    Navigator.of(context).pop(); // Close pin dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Staff access is now controlled by your account permissions'),
+        backgroundColor: Color(0xFF8B7355), // Darker beige
+      ),
+    );
   }
 
   void _showScanQRDialog() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const QRScannerPage(),
-      ),
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            height: 400,
+            width: 300,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF8B7355),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Scan Customer QR Code',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                // QR Scanner
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF8B7355), width: 2),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: const QRScannerWidget(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
-
-    if (result != null) {
-      // Handle the scanned QR code result
-      print('Scanned QR Code: $result');
-      // You can add additional logic here to process the scanned data
-    }
   }
 
   @override
@@ -555,7 +591,14 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
               
               // Welcome Card - Show different content for staff vs customer
-              if (!_isStaffMode) ...[
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final user = authProvider.currentUser;
+                  final isStaff = user?.staff ?? false;
+
+                  if (!isStaff) {
+                    return Column(
+                      children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                   child: Container(
@@ -740,162 +783,180 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ),
                     ),
                   ),
-                ),
-              ] else ...[
-                // Staff Mode - Simple welcome
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: const [
-                        BoxShadow(
-                          blurRadius: 10,
-                          color: Color(0x1A000000),
-                          offset: Offset(0.0, 5),
-                        )
+                        ),
                       ],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.qr_code_scanner,
-                            color: Color(0xFF8B7355), // Darker beige
-                            size: 48,
-                          ),
-                          SizedBox(height: 12),
-                          Text(
-                            'Staff Mode',
-                            style: TextStyle(
-                              color: Color(0xFF2F1B14),
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                    );
+                  } else {
+                    // Staff Mode - Simple welcome
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: const [
+                                BoxShadow(
+                                  blurRadius: 10,
+                                  color: Color(0x1A000000),
+                                  offset: Offset(0.0, 5),
+                                )
+                              ],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.qr_code_scanner,
+                                    color: Color(0xFF8B7355), // Darker beige
+                                    size: 48,
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    'Staff Mode',
+                                    style: TextStyle(
+                                      color: Color(0xFF2F1B14),
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Ready to scan customer QR codes',
+                                    style: TextStyle(
+                                      color: Color(0xFF8B7355), // Darker beige
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          Text(
-                            'Ready to scan customer QR codes',
-                            style: TextStyle(
-                              color: Color(0xFF8B7355), // Darker beige
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+
+              // Action Buttons - Different for staff vs customer
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final user = authProvider.currentUser;
+                  final isStaff = user?.staff ?? false;
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        // QR Code button - Show for customers, Scan for staff
+                        if (!isStaff) ...[
+                          ElevatedButton.icon(
+                            onPressed: _showQRCodeDialog,
+                            icon: const Icon(
+                              Icons.qr_code,
+                              color: Colors.white
+                            ),
+                            label: const Text('Show My QR Code'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8B7355), // Darker beige
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
 
-              // Action Buttons - Different for staff vs customer
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    // QR Code button (always shown)
-                    ElevatedButton.icon(
-                      onPressed: _isStaffMode ? _showScanQRDialog : _showQRCodeDialog,
-                      icon: Icon(
-                        _isStaffMode ? Icons.qr_code_scanner : Icons.qr_code,
-                        color: Colors.white
-                      ),
-                      label: Text(_isStaffMode ? 'Scan QR Code' : 'Show My QR Code'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8B7355), // Darker beige
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-
-                    // Staff mode: Only show logout button
-                    if (_isStaffMode) ...[
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _isStaffMode = false;
-                          });
-                        },
-                        icon: const Icon(Icons.logout, color: Colors.red),
-                        label: const Text('Exit Staff Mode'),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.red,
-                          minimumSize: const Size(double.infinity, 56),
-                          side: const BorderSide(color: Colors.red, width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ] else ...[
-                      // Customer mode: Show rewards and menu buttons
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RewardsPage(),
+                        // Staff QR Scanner button (only show if staff)
+                        if (isStaff) ...[
+                          // Staff QR Scanner button
+                          ElevatedButton.icon(
+                            onPressed: _showScanQRDialog,
+                            icon: const Icon(
+                              Icons.qr_code_scanner,
+                              color: Colors.white
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.card_giftcard, color: Color(0xFF8B7355)),
-                        label: const Text('View Rewards'),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B7355), // Match button color
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 56),
-                          side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            label: const Text('Scan QR Code'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8B7355), // Darker beige
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                        ],
+
+                        // Customer buttons (only show if not staff)
+                        if (!isStaff) ...[
+                          // Customer mode: Show rewards and menu buttons
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RewardsPage(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.card_giftcard, color: Color(0xFF8B7355)),
+                            label: const Text('View Rewards'),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8B7355), // Match button color
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 56),
+                              side: const BorderSide(color: Color(0xFF8B7355), width: 2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          _launchURL('https://www.gingerandcocoffeeshop.co.uk/menu');
-                        },
-                        icon: const Icon(Icons.restaurant_menu, color: Color(0xFF8B7355)),
-                        label: const Text('Menu'),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: const Color(0xFF8B7355), // Darker beige
-                          minimumSize: const Size(double.infinity, 56),
-                          side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              _launchURL('https://www.gingerandcocoffeeshop.co.uk/menu');
+                            },
+                            icon: const Icon(Icons.restaurant_menu, color: Color(0xFF8B7355)),
+                            label: const Text('Menu'),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: const Color(0xFF8B7355), // Darker beige
+                              minimumSize: const Size(double.infinity, 56),
+                              side: const BorderSide(color: Color(0xFF8B7355), width: 2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
               ),
 
 
@@ -906,6 +967,117 @@ class _HomeWidgetState extends State<HomeWidget> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class QRScannerWidget extends StatefulWidget {
+  const QRScannerWidget({super.key});
+
+  @override
+  State<QRScannerWidget> createState() => _QRScannerWidgetState();
+}
+
+class _QRScannerWidgetState extends State<QRScannerWidget> {
+  MobileScannerController controller = MobileScannerController();
+  bool isScanning = true;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        MobileScanner(
+          controller: controller,
+          onDetect: (BarcodeCapture capture) {
+            if (!isScanning) return;
+
+            final List<Barcode> barcodes = capture.barcodes;
+            for (final barcode in barcodes) {
+              if (barcode.rawValue != null) {
+                setState(() {
+                  isScanning = false;
+                });
+                _handleScanResult(barcode.rawValue!);
+                break;
+              }
+            }
+          },
+        ),
+        // Scanning overlay
+        Center(
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: const Color(0xFF8B7355),
+                width: 3,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handleScanResult(String scannedData) {
+    // Close the scanner dialog
+    Navigator.of(context).pop();
+
+    // Show success dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'QR Code Scanned!',
+            style: TextStyle(
+              color: Color(0xFF8B7355),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Customer ID: $scannedData',
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Point added successfully!',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF8B7355)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
