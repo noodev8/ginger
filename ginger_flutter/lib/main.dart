@@ -55,8 +55,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Show loading screen while checking auth state
-        if (authProvider.isLoading) {
+        // Show loading screen while checking auth state (but not during login attempts)
+        if (authProvider.isLoading && authProvider.currentUser == null && authProvider.lastError == null) {
           return const Scaffold(
             backgroundColor: Color(0xFFF7EDE4),
             body: Center(
@@ -177,8 +177,13 @@ class _HomeWidgetState extends State<HomeWidget> {
                     color: const Color(0xFF8B7355),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: QrImageView(
-                    data: 'USER_ID_SARAH_JOHNSON_847_POINTS',
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      final user = authProvider.currentUser;
+                      final qrData = 'USER_ID_${user?.id ?? 0}_${user?.displayName?.replaceAll(' ', '_').toUpperCase() ?? user?.email?.split('@')[0].toUpperCase() ?? 'GUEST'}_847_POINTS';
+
+                      return QrImageView(
+                        data: qrData,
                     version: QrVersions.auto,
                     size: 200.0,
                     backgroundColor: Colors.white,
@@ -186,42 +191,51 @@ class _HomeWidgetState extends State<HomeWidget> {
                       dataModuleShape: QrDataModuleShape.square,
                       color: Color(0xFF2F1B14),
                     ),
-                    eyeStyle: const QrEyeStyle(
-                      eyeShape: QrEyeShape.square,
-                      color: Color(0xFF2F1B14),
-                    ),
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Color(0xFF2F1B14),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 20),
 
                 // User Info
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8B7355),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Column(
-                    children: [
-                      Text(
-                        'Sarah Johnson',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    final user = authProvider.currentUser;
+                    final displayName = user?.displayName ?? user?.email ?? 'Guest';
+
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF8B7355),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      Text(
-                        '847 Points • 84 Free Coffees',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      child: Column(
+                        children: [
+                          Text(
+                            displayName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Text(
+                            '847 Points • 84 Free Coffees',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
 
@@ -566,30 +580,37 @@ class _HomeWidgetState extends State<HomeWidget> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.all(2),
-                                    child: Text(
-                                      'Welcome back,',
-                                      style: TextStyle(
-                                        color: Color(0xFF8B7355), // Darker beige
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+                              Consumer<AuthProvider>(
+                                builder: (context, authProvider, child) {
+                                  final user = authProvider.currentUser;
+                                  final displayName = user?.displayName ?? (user?.email != null ? user!.email.split('@')[0] : 'Guest');
+
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.all(2),
+                                        child: Text(
+                                          'Welcome back,',
+                                          style: TextStyle(
+                                            color: Color(0xFF8B7355), // Darker beige
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  Text(
-                                    'Sarah Johnson',
-                                    style: TextStyle(
-                                      color: Color(0xFF2F1B14),
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                                      Text(
+                                        displayName,
+                                        style: const TextStyle(
+                                          color: Color(0xFF2F1B14),
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                               GestureDetector(
                                 onTap: () {

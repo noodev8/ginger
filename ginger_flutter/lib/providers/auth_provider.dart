@@ -5,30 +5,38 @@ import '../services/auth_service.dart';
 class AuthProvider extends ChangeNotifier {
   User? _currentUser;
   bool _isLoading = false;
+  String? _lastError;
   final AuthService _authService = AuthService();
 
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _currentUser != null;
+  String? get lastError => _lastError;
+
+  /// Clear the last error message
+  void clearError() {
+    _lastError = null;
+    notifyListeners();
+  }
 
   /// Login user
+  /// Returns true on success, false on failure
+  /// Check lastError for specific error message
   Future<bool> login(String email, String password) async {
     _isLoading = true;
+    _lastError = null;
     notifyListeners();
 
     try {
       final user = await _authService.login(email, password);
-      if (user != null) {
-        _currentUser = user;
-        // TODO: Store auth token in secure storage
-        notifyListeners();
-        return true;
-      }
-      return false;
+      _currentUser = user;
+      notifyListeners();
+      return true;
     } catch (e) {
       if (kDebugMode) {
         print('Login error in provider: $e');
       }
+      _lastError = e.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
       _isLoading = false;
@@ -37,6 +45,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Register user
+  /// Returns true on success, false on failure
+  /// Check lastError for specific error message
   Future<bool> register({
     required String email,
     required String password,
@@ -44,6 +54,7 @@ class AuthProvider extends ChangeNotifier {
     String? phone,
   }) async {
     _isLoading = true;
+    _lastError = null;
     notifyListeners();
 
     try {
@@ -53,17 +64,14 @@ class AuthProvider extends ChangeNotifier {
         displayName: displayName,
         phone: phone,
       );
-      if (user != null) {
-        _currentUser = user;
-        // TODO: Store auth token in secure storage
-        notifyListeners();
-        return true;
-      }
-      return false;
+      _currentUser = user;
+      notifyListeners();
+      return true;
     } catch (e) {
       if (kDebugMode) {
         print('Registration error in provider: $e');
       }
+      _lastError = e.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
       _isLoading = false;

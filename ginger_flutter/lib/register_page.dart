@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
 import 'providers/auth_provider.dart';
-import 'main.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -52,12 +51,11 @@ class _RegisterPageState extends State<RegisterPage> {
     if (mounted) {
       if (success) {
         _showSnackBar('Account created successfully! Welcome to Ginger & Co.', isError: false);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeWidget())
-        );
+        // Navigation will be handled automatically by AuthWrapper
       } else {
-        _showSnackBar('Registration failed. Please try again.');
+        // Use specific error message from the provider
+        final errorMessage = authProvider.lastError ?? 'Registration failed. Please try again.';
+        _showSnackBar(errorMessage);
       }
     }
   }

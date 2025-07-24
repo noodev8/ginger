@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
+import 'providers/auth_provider.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -243,21 +245,33 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Sarah Johnson',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'sarah.johnson@email.com',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          final user = authProvider.currentUser;
+                          final displayName = user?.displayName ?? user?.email ?? 'Guest';
+                          final email = user?.email ?? '';
+
+                          return Column(
+                            children: [
+                              Text(
+                                displayName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                email,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),

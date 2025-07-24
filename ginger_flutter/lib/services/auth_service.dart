@@ -13,8 +13,8 @@ class AuthService {
   static const String _userKey = 'user_data';
   
   /// Login user with email and password
-  /// Returns User object with auth token on success, null on failure
-  Future<User?> login(String email, String password) async {
+  /// Returns User object with auth token on success, throws exception with error message on failure
+  Future<User> login(String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}${ApiConfig.loginEndpoint}'),
@@ -25,35 +25,50 @@ class AuthService {
         }),
       ).timeout(ApiConfig.requestTimeout);
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body);
 
-        if (responseData['return_code'] == 'SUCCESS') {
-          final userData = responseData['user'] as Map<String, dynamic>;
-          final user = User.fromJson(userData);
+      if (response.statusCode == 200 && responseData['return_code'] == 'SUCCESS') {
+        final userData = responseData['user'] as Map<String, dynamic>;
+        final user = User.fromJson(userData);
 
-          // Store auth token and user data securely
-          if (user.authToken != null) {
-            await _storage.write(key: _tokenKey, value: user.authToken);
-            await _storage.write(key: _userKey, value: jsonEncode(userData));
-          }
-
-          return user;
+        // Store auth token and user data securely
+        if (user.authToken != null) {
+          await _storage.write(key: _tokenKey, value: user.authToken);
+          await _storage.write(key: _userKey, value: jsonEncode(userData));
         }
-      }
 
-      return null;
+        return user;
+      } else {
+        // Handle specific error cases
+        String errorMessage = 'Login failed. Please try again.';
+
+        if (responseData['message'] != null) {
+          errorMessage = responseData['message'];
+        } else if (response.statusCode == 401) {
+          errorMessage = 'Invalid email or password.';
+        } else if (response.statusCode >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+
+        throw Exception(errorMessage);
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Login error: $e');
       }
-      return null;
+
+      if (e is Exception) {
+        rethrow;
+      }
+
+      // Network or other errors
+      throw Exception('Unable to connect. Please check your internet connection.');
     }
   }
   
   /// Register new user
-  /// Returns User object with auth token on success, null on failure
-  Future<User?> register({
+  /// Returns User object with auth token on success, throws exception with error message on failure
+  Future<User> register({
     required String email,
     required String password,
     String? displayName,
@@ -71,29 +86,47 @@ class AuthService {
         }),
       ).timeout(ApiConfig.requestTimeout);
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body);
 
-        if (responseData['return_code'] == 'SUCCESS') {
-          final userData = responseData['user'] as Map<String, dynamic>;
-          final user = User.fromJson(userData);
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          responseData['return_code'] == 'SUCCESS') {
+        final userData = responseData['user'] as Map<String, dynamic>;
+        final user = User.fromJson(userData);
 
-          // Store auth token and user data securely
-          if (user.authToken != null) {
-            await _storage.write(key: _tokenKey, value: user.authToken);
-            await _storage.write(key: _userKey, value: jsonEncode(userData));
-          }
-
-          return user;
+        // Store auth token and user data securely
+        if (user.authToken != null) {
+          await _storage.write(key: _tokenKey, value: user.authToken);
+          await _storage.write(key: _userKey, value: jsonEncode(userData));
         }
-      }
 
-      return null;
+        return user;
+      } else {
+        // Handle specific error cases
+        String errorMessage = 'Registration failed. Please try again.';
+
+        if (responseData['message'] != null) {
+          errorMessage = responseData['message'];
+        } else if (response.statusCode == 409) {
+          errorMessage = 'An account with this email already exists.';
+        } else if (response.statusCode == 400) {
+          errorMessage = 'Please check your information and try again.';
+        } else if (response.statusCode >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+
+        throw Exception(errorMessage);
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Registration error: $e');
       }
-      return null;
+
+      if (e is Exception) {
+        rethrow;
+      }
+
+      // Network or other errors
+      throw Exception('Unable to connect. Please check your internet connection.');
     }
   }
   

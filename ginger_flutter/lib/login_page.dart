@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
 import 'register_page.dart';
 import 'providers/auth_provider.dart';
-import 'main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -21,7 +20,24 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Clear errors when user starts typing
+    _emailController.addListener(_clearErrorOnChange);
+    _passwordController.addListener(_clearErrorOnChange);
+  }
+
+  void _clearErrorOnChange() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.lastError != null) {
+      authProvider.clearError();
+    }
+  }
+
+  @override
   void dispose() {
+    _emailController.removeListener(_clearErrorOnChange);
+    _passwordController.removeListener(_clearErrorOnChange);
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -40,26 +56,51 @@ class _LoginPageState extends State<LoginPage> {
     if (mounted) {
       if (success) {
         _showSnackBar('Login successful! Welcome back.', isError: false);
-        // Navigation will be handled by the main app based on auth state
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeWidget())
-        );
+        // Navigation will be handled automatically by AuthWrapper
       } else {
-        _showSnackBar('Invalid email or password. Please try again.');
+        // Use specific error message from the provider
+        final errorMessage = authProvider.lastError ?? 'Login failed. Please try again.';
+        _showSnackBar(errorMessage);
+
+        // Clear the password field on failed login
+        _passwordController.clear();
       }
     }
   }
 
   void _showSnackBar(String message, {bool isError = true}) {
+    // Clear any existing snackbars first
+    ScaffoldMessenger.of(context).clearSnackBars();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : const Color(0xFF8B7355),
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isError ? Colors.red.shade600 : const Color(0xFF8B7355),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
+        duration: Duration(seconds: isError ? 4 : 2), // Show errors longer
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -154,73 +195,136 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 32),
 
                           // Email Field
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              labelText: 'Email',
-                              hintText: 'Enter your email',
-                              prefixIcon: const Icon(Icons.email_outlined),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
-                                  width: 2,
+                          Consumer<AuthProvider>(
+                            builder: (context, authProvider, child) {
+                              final hasError = authProvider.lastError != null;
+                              return TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                decoration: InputDecoration(
+                                  labelText: 'Email',
+                                  hintText: 'Enter your email',
+                                  prefixIcon: const Icon(Icons.email_outlined),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: hasError ? Colors.red : const Color(0xFF8B7355),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: Colors.red,
+                                      width: 2,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your email';
-                              }
-                              if (!_authService.isValidEmail(value)) {
-                                return 'Please enter a valid email';
-                              }
-                              return null;
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your email';
+                                  }
+                                  if (!_authService.isValidEmail(value)) {
+                                    return 'Please enter a valid email';
+                                  }
+                                  return null;
+                                },
+                              );
                             },
                           ),
                           const SizedBox(height: 16),
 
                           // Password Field
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            decoration: InputDecoration(
-                              labelText: 'Password',
-                              hintText: 'Enter your password',
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          Consumer<AuthProvider>(
+                            builder: (context, authProvider, child) {
+                              final hasError = authProvider.lastError != null;
+                              return TextFormField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                decoration: InputDecoration(
+                                  labelText: 'Password',
+                                  hintText: 'Enter your password',
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: hasError ? Colors.red : const Color(0xFF8B7355),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: Colors.red,
+                                      width: 2,
+                                    ),
+                                  ),
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your password';
+                                  }
+                                  return null;
                                 },
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              return null;
+                              );
                             },
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+
+                          // Error Message Display
+                          Consumer<AuthProvider>(
+                            builder: (context, authProvider, child) {
+                              if (authProvider.lastError != null) {
+                                return Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    border: Border.all(color: Colors.red.shade200),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.red.shade600,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          authProvider.lastError!,
+                                          style: TextStyle(
+                                            color: Colors.red.shade700,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
 
                           // Login Button
                           Consumer<AuthProvider>(
