@@ -1,0 +1,2 @@
+NEVER put any database details anywhere except the .env file.
+Only have one .env file - don't go making temporary versions or copies pleasee

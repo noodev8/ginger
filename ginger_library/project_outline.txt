@@ -1,0 +1,53 @@
+# Ginger & Co Coffee Shop Loyalty App
+
+A digital loyalty app for [Ginger & Co Coffee Shop](https://www.gingerandcocoffeeshop.co.uk/), designed to let customers collect points and redeem them for free coffee. The system is built to allow easy adaptation for other coffee shops in the future.
+
+## 📱 App Overview
+
+Customers earn loyalty points by scanning their unique QR code at the counter. Staff use the same login system as customers, but users marked as staff have access to additional features like awarding points and redeeming rewards.
+
+## 👤 Users
+
+All users authenticate the same way, but users with a `staff = true` flag in the database gain additional functionality.
+
+- **Customer**
+  - Log in securely
+  - View current loyalty points
+  - Display their personal QR code for scanning
+
+- **Staff (users with staff privileges)**
+  - All customer features
+  - Scan customer QR codes to:
+    - Add loyalty points
+    - Redeem free coffees when eligible
+
+## 🎯 Loyalty Rules
+
+- **1 scan = 1 point**
+- **10 points = 1 free coffee**
+- When a customer has **10 or more points**, staff are prompted to redeem a free coffee
+
+## 🧱 Tech Stack
+
+- **Frontend**: Flutter (cross-platform mobile app)
+- **Backend**: Node.js with Express
+- **Database**: PostgreSQL
+
+---
+
+## 🚧 Future Considerations
+
+- White-labeling support for other coffee shops
+- Admin dashboard for reporting and analytics
+- Reward history tracking
+- Notifications (e.g., “You’re 1 point away from a free coffee!”)
+
+---
+
+## 📂 Project Setup
+
+_Setup instructions (e.g., installing dependencies, running locally, setting up environment variables) will be added here during development._
+
+---
+
+Feel free to suggest edits, feature ideas, or implementation notes as development progresses.
