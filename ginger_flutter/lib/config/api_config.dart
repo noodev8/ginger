@@ -1,7 +1,7 @@
 class ApiConfig {
   // Update this URL to match your server configuration
  
-  static const String baseUrl = 'http://192.168.1.186:3000'; // work
+ // static const String baseUrl = 'http://192.168.1.186:3000'; // work
   static const String baseUrl = 'http://192.168.1.173:3000'; // shrewsbury
   
   // API endpoints
