@@ -590,15 +590,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                 ),
               ),
               
-              // Welcome Card - Show different content for staff vs customer
+              // Welcome Card - Show customer card for everyone, with staff indicator if applicable
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
                   final user = authProvider.currentUser;
                   final isStaff = user?.staff ?? false;
 
-                  if (!isStaff) {
-                    return Column(
-                      children: [
+                  return Column(
+                    children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                   child: Container(
@@ -627,6 +626,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 builder: (context, authProvider, child) {
                                   final user = authProvider.currentUser;
                                   final displayName = user?.displayName ?? (user?.email != null ? user!.email.split('@')[0] : 'Guest');
+                                  final isStaff = user?.staff ?? false;
 
                                   return Column(
                                     mainAxisSize: MainAxisSize.max,
@@ -643,13 +643,35 @@ class _HomeWidgetState extends State<HomeWidget> {
                                           ),
                                         ),
                                       ),
-                                      Text(
-                                        displayName,
-                                        style: const TextStyle(
-                                          color: Color(0xFF2F1B14),
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            displayName,
+                                            style: const TextStyle(
+                                              color: Color(0xFF2F1B14),
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          if (isStaff) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF2F1B14),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: const Text(
+                                                'STAFF',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ],
                                   );
@@ -786,59 +808,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ),
                       ],
                     );
-                  } else {
-                    // Staff Mode - Simple welcome
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: const [
-                                BoxShadow(
-                                  blurRadius: 10,
-                                  color: Color(0x1A000000),
-                                  offset: Offset(0.0, 5),
-                                )
-                              ],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(20),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.qr_code_scanner,
-                                    color: Color(0xFF8B7355), // Darker beige
-                                    size: 48,
-                                  ),
-                                  SizedBox(height: 12),
-                                  Text(
-                                    'Staff Mode',
-                                    style: TextStyle(
-                                      color: Color(0xFF2F1B14),
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Ready to scan customer QR codes',
-                                    style: TextStyle(
-                                      color: Color(0xFF8B7355), // Darker beige
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
                 },
               ),
 
@@ -853,42 +822,40 @@ class _HomeWidgetState extends State<HomeWidget> {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        // QR Code button - Show for customers, Scan for staff
-                        if (!isStaff) ...[
-                          ElevatedButton.icon(
-                            onPressed: _showQRCodeDialog,
-                            icon: const Icon(
-                              Icons.qr_code,
-                              color: Colors.white
+                        // Show My QR Code button (for everyone)
+                        ElevatedButton.icon(
+                          onPressed: _showQRCodeDialog,
+                          icon: const Icon(
+                            Icons.qr_code,
+                            color: Colors.white
+                          ),
+                          label: const Text('Show My QR Code'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8B7355), // Darker beige
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 56),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            label: const Text('Show My QR Code'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8B7355), // Darker beige
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size(double.infinity, 56),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
+                        ),
 
-                        // Staff QR Scanner button (only show if staff)
+                        // Staff QR Scanner button (additional button for staff)
                         if (isStaff) ...[
-                          // Staff QR Scanner button
+                          const SizedBox(height: 12),
                           ElevatedButton.icon(
                             onPressed: _showScanQRDialog,
                             icon: const Icon(
                               Icons.qr_code_scanner,
                               color: Colors.white
                             ),
-                            label: const Text('Scan QR Code'),
+                            label: const Text('Scan Customer QR Code'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8B7355), // Darker beige
+                              backgroundColor: const Color(0xFF2F1B14), // Darker color for staff function
                               foregroundColor: Colors.white,
                               minimumSize: const Size(double.infinity, 56),
                               shape: RoundedRectangleBorder(
@@ -902,57 +869,54 @@ class _HomeWidgetState extends State<HomeWidget> {
                           ),
                         ],
 
-                        // Customer buttons (only show if not staff)
-                        if (!isStaff) ...[
-                          // Customer mode: Show rewards and menu buttons
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RewardsPage(),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.card_giftcard, color: Color(0xFF8B7355)),
-                            label: const Text('View Rewards'),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8B7355), // Match button color
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size(double.infinity, 56),
-                              side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                        // Standard customer buttons (for everyone)
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RewardsPage(),
                               ),
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.card_giftcard, color: Color(0xFF8B7355)),
+                          label: const Text('View Rewards'),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8B7355), // Match button color
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 56),
+                            side: const BorderSide(color: Color(0xFF8B7355), width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              _launchURL('https://www.gingerandcocoffeeshop.co.uk/menu');
-                            },
-                            icon: const Icon(Icons.restaurant_menu, color: Color(0xFF8B7355)),
-                            label: const Text('Menu'),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: const Color(0xFF8B7355), // Darker beige
-                              minimumSize: const Size(double.infinity, 56),
-                              side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            _launchURL('https://www.gingerandcocoffeeshop.co.uk/menu');
+                          },
+                          icon: const Icon(Icons.restaurant_menu, color: Color(0xFF8B7355)),
+                          label: const Text('Menu'),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: const Color(0xFF8B7355), // Darker beige
+                            minimumSize: const Size(double.infinity, 56),
+                            side: const BorderSide(color: Color(0xFF8B7355), width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ),
                   );
