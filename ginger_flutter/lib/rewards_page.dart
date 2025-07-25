@@ -1,12 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
+import 'services/points_service.dart';
+import 'models/loyalty_points.dart';
 
-class RewardsPage extends StatelessWidget {
+class RewardsPage extends StatefulWidget {
   const RewardsPage({Key? key}) : super(key: key);
 
   @override
+  State<RewardsPage> createState() => _RewardsPageState();
+}
+
+class _RewardsPageState extends State<RewardsPage> {
+  final PointsService _pointsService = PointsService();
+  LoyaltyPoints? _loyaltyPoints;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPoints();
+  }
+
+  Future<void> _loadPoints() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+
+    if (user?.id == null) {
+      setState(() {
+        _error = 'User not found';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final points = await _pointsService.getUserPoints(user!.id!);
+      if (mounted) {
+        setState(() {
+          _loyaltyPoints = points;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Mock data - in a real app this would come from a backend
-    final int currentPoints = 7;
+    // Calculate points data
+    final int currentPoints = _loyaltyPoints?.currentPoints ?? 0;
     final int pointsNeeded = 10;
     final bool hasFreeReward = currentPoints >= pointsNeeded;
     final int pointsToNext = pointsNeeded - currentPoints;
@@ -24,8 +74,72 @@ class RewardsPage extends StatelessWidget {
         backgroundColor: const Color(0xFF8B7355), // Darker beige
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                _isLoading = true;
+                _error = null;
+              });
+              _loadPoints();
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+              ),
+            )
+          : _error != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Unable to load points',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _error!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _isLoading = true;
+                            _error = null;
+                          });
+                          _loadPoints();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8B7355),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
         child: Column(
           children: [
             // Header with gradient - matching home page pattern

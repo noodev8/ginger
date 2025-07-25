@@ -7,6 +7,9 @@ import 'account_page.dart';
 import 'rewards_page.dart';
 import 'login_page.dart';
 import 'providers/auth_provider.dart';
+import 'services/qr_code_service.dart';
+import 'services/points_service.dart';
+import 'models/user_qr_code.dart';
 
 
 
@@ -179,22 +182,19 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: Consumer<AuthProvider>(
                     builder: (context, authProvider, child) {
                       final user = authProvider.currentUser;
-                      final qrData = 'USER_ID_${user?.id ?? 0}_${user?.displayName?.replaceAll(' ', '_').toUpperCase() ?? user?.email?.split('@')[0].toUpperCase() ?? 'GUEST'}_847_POINTS';
+                      if (user?.id == null) {
+                        return const SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        );
+                      }
 
-                      return QrImageView(
-                        data: qrData,
-                    version: QrVersions.auto,
-                    size: 200.0,
-                    backgroundColor: Colors.white,
-                    dataModuleStyle: const QrDataModuleStyle(
-                      dataModuleShape: QrDataModuleShape.square,
-                      color: Color(0xFF2F1B14),
-                    ),
-                        eyeStyle: const QrEyeStyle(
-                          eyeShape: QrEyeShape.square,
-                          color: Color(0xFF2F1B14),
-                        ),
-                      );
+                      return UserQRCodeWidget(userId: user!.id!);
                     },
                   ),
                 ),
@@ -991,11 +991,100 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
     );
   }
 
-  void _handleScanResult(String scannedData) {
+  void _handleScanResult(String scannedData) async {
     // Close the scanner dialog
     Navigator.of(context).pop();
 
-    // Show success dialog
+    // Get current user (staff member)
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final staffUser = authProvider.currentUser;
+
+    if (staffUser == null || !staffUser.staff) {
+      _showErrorDialog('Only staff members can scan QR codes.');
+      return;
+    }
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+              ),
+              SizedBox(height: 16),
+              Text('Processing QR code...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final qrCodeService = QRCodeService();
+      final pointsService = PointsService();
+
+      // First validate QR code format locally
+      if (!QRCodeService.isValidQRCodeFormat(scannedData)) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog('Invalid QR code format. Please scan a valid customer QR code.');
+        return;
+      }
+
+      // Validate the QR code with server
+      final validationResult = await qrCodeService.validateQRCode(scannedData);
+
+      if (!mounted) return;
+
+      if (validationResult == null) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog('QR code not found or invalid. Please ensure the customer has a valid account.');
+        return;
+      }
+
+      final userId = validationResult['user_id'] as int;
+      final userName = validationResult['user_name'] as String? ?? 'Customer';
+
+      // Check if this QR code can be scanned (prevent duplicates)
+      final canScan = await pointsService.canScanQRCode(scannedData, staffUser.id!);
+
+      if (!mounted) return;
+
+      if (!canScan) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog('This QR code has been scanned recently. Please wait before scanning again.');
+        return;
+      }
+
+      // Add points to the user
+      final success = await pointsService.addPointsToUser(
+        userId: userId,
+        staffUserId: staffUser.id!,
+        pointsAmount: 1,
+        description: 'QR code scan by ${staffUser.displayName ?? staffUser.email}',
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop(); // Close loading dialog
+
+      if (success) {
+        _showSuccessDialog(userName, scannedData);
+      } else {
+        _showErrorDialog('Failed to add points. Please try again.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Close loading dialog
+      _showErrorDialog('An error occurred: ${e.toString()}');
+    }
+  }
+
+  void _showSuccessDialog(String userName, String qrData) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1017,13 +1106,19 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Customer ID: $scannedData',
-                style: const TextStyle(fontSize: 16),
+                'Customer: $userName',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'QR Code: $qrData',
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               const Text(
-                'Point added successfully!',
+                '1 point added successfully!',
                 style: TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.w500,
@@ -1042,6 +1137,147 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
           ],
         );
       },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Error',
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF8B7355)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Widget for displaying user's QR code
+class UserQRCodeWidget extends StatefulWidget {
+  final int userId;
+
+  const UserQRCodeWidget({Key? key, required this.userId}) : super(key: key);
+
+  @override
+  State<UserQRCodeWidget> createState() => _UserQRCodeWidgetState();
+}
+
+class _UserQRCodeWidgetState extends State<UserQRCodeWidget> {
+  final QRCodeService _qrCodeService = QRCodeService();
+  UserQRCode? _userQRCode;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQRCode();
+  }
+
+  Future<void> _loadQRCode() async {
+    try {
+      final qrCode = await _qrCodeService.getUserQRCode(widget.userId);
+      if (mounted) {
+        setState(() {
+          _userQRCode = qrCode;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SizedBox(
+        width: 200,
+        height: 200,
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      );
+    }
+
+    if (_error != null || _userQRCode == null) {
+      return SizedBox(
+        width: 200,
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: Colors.white,
+                size: 48,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Unable to load QR code',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                    _error = null;
+                  });
+                  _loadQRCode();
+                },
+                child: const Text(
+                  'Retry',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return QrImageView(
+      data: _userQRCode!.qrCodeData,
+      version: QrVersions.auto,
+      size: 200.0,
+      backgroundColor: Colors.white,
+      dataModuleStyle: const QrDataModuleStyle(
+        dataModuleShape: QrDataModuleShape.square,
+        color: Color(0xFF2F1B14),
+      ),
+      eyeStyle: const QrEyeStyle(
+        eyeShape: QrEyeShape.square,
+        color: Color(0xFF2F1B14),
+      ),
     );
   }
 }
