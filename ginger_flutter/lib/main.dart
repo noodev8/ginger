@@ -7,6 +7,8 @@ import 'login_page.dart';
 import 'providers/auth_provider.dart';
 import 'widgets/qr_scanner_widget.dart';
 import 'widgets/user_qr_widget.dart';
+import 'widgets/points_display_widget.dart';
+import 'widgets/user_points_summary_widget.dart';
 
 
 
@@ -220,14 +222,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const Text(
-                            '847 Points • 84 Free Coffees',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                          UserPointsSummaryWidget(userId: user?.id ?? 0),
                         ],
                       ),
                     );
@@ -800,103 +795,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                             ],
                           ),
 
-                          // Progress Circle Points Card
+                          // Real Points Display
                           Padding(
                             padding: const EdgeInsets.all(12),
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF7EDE4), // Match main background
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: const Color(0xFF8B7355).withValues(alpha: 0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  children: [
-                                    // Progress Circle - Made smaller
-                                    SizedBox(
-                                      width: 90,
-                                      height: 90,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          // Background circle
-                                          SizedBox(
-                                            width: 90,
-                                            height: 90,
-                                            child: CircularProgressIndicator(
-                                              value: 1.0,
-                                              strokeWidth: 6,
-                                              backgroundColor: Colors.transparent,
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                Colors.grey[300]!,
-                                              ),
-                                            ),
-                                          ),
-                                          // Progress circle
-                                          SizedBox(
-                                            width: 90,
-                                            height: 90,
-                                            child: CircularProgressIndicator(
-                                              value: 0.7, // 7/10 = 0.7
-                                              strokeWidth: 6,
-                                              backgroundColor: Colors.transparent,
-                                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                                Color(0xFF8B7355), // Darker beige
-                                              ),
-                                            ),
-                                          ),
-                                          // Coffee cup icon in center
-                                          Container(
-                                            width: 45,
-                                            height: 45,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.15),
-                                                  blurRadius: 8,
-                                                  spreadRadius: 1,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Image.asset(
-                                              'assets/coffee_icon2.png',
-                                              width: 45,
-                                              height: 45,
-                                              fit: BoxFit.contain,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    // Points text - Made smaller
-                                    const Text(
-                                      '7 pts',
-                                      style: TextStyle(
-                                        color: Color(0xFF2F1B14),
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Text(
-                                      '3 to next free drink',
-                                      style: TextStyle(
-                                        color: Color(0xFF8B7355), // Darker beige
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            child: PointsDisplayWidget(userId: user?.id ?? 0),
                           ),
                         ],
                       ),
