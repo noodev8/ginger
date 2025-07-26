@@ -7,18 +7,22 @@ class QRCodeService {
    */
   async getUserQRCode(userId) {
     try {
+      console.log(`[QR_CODE_SERVICE] Getting QR code for user ${userId}`);
+      
       const result = await database.query(
         'SELECT * FROM user_qr_codes WHERE user_id = $1',
         [userId]
       );
 
       if (result.rows.length === 0) {
+        console.log(`[QR_CODE_SERVICE] No QR code found for user ${userId}`);
         return null;
       }
 
+      console.log(`[QR_CODE_SERVICE] Found QR code for user ${userId}:`, result.rows[0].qr_code_data);
       return result.rows[0];
     } catch (error) {
-      console.error('Get user QR code error:', error.message);
+      console.error('[QR_CODE_SERVICE] Get user QR code error:', error.message);
       throw error;
     }
   }
@@ -28,9 +32,12 @@ class QRCodeService {
    */
   async createQRCode(userId, qrCodeData) {
     try {
+      console.log(`[QR_CODE_SERVICE] Creating QR code for user ${userId}: ${qrCodeData}`);
+      
       // Check if QR code already exists
       const existing = await this.getUserQRCode(userId);
       if (existing) {
+        console.log(`[QR_CODE_SERVICE] QR code already exists for user ${userId}, returning existing`);
         return existing;
       }
 
@@ -40,9 +47,10 @@ class QRCodeService {
         [userId, qrCodeData]
       );
 
+      console.log(`[QR_CODE_SERVICE] Successfully created QR code:`, result.rows[0]);
       return result.rows[0];
     } catch (error) {
-      console.error('Create QR code error:', error.message);
+      console.error('[QR_CODE_SERVICE] Create QR code error:', error.message);
       throw error;
     }
   }
@@ -52,6 +60,14 @@ class QRCodeService {
    */
   async validateQRCode(qrCodeData) {
     try {
+      console.log(`[QR_CODE_SERVICE] Validating QR code: ${qrCodeData}`);
+      
+      // First validate format
+      if (!this.isValidQRCodeFormat(qrCodeData)) {
+        console.log(`[QR_CODE_SERVICE] Invalid QR code format: ${qrCodeData}`);
+        return null;
+      }
+
       const result = await database.query(
         `SELECT uqr.*, au.display_name, au.email 
          FROM user_qr_codes uqr 
@@ -61,10 +77,12 @@ class QRCodeService {
       );
 
       if (result.rows.length === 0) {
+        console.log(`[QR_CODE_SERVICE] QR code not found in database: ${qrCodeData}`);
         return null;
       }
 
       const qrCode = result.rows[0];
+      console.log(`[QR_CODE_SERVICE] Found QR code for user ${qrCode.user_id} (${qrCode.display_name || qrCode.email})`);
       
       return {
         user_id: qrCode.user_id,
@@ -72,7 +90,7 @@ class QRCodeService {
         qr_code_data: qrCode.qr_code_data
       };
     } catch (error) {
-      console.error('Validate QR code error:', error.message);
+      console.error('[QR_CODE_SERVICE] Validate QR code error:', error.message);
       throw error;
     }
   }
@@ -82,20 +100,9 @@ class QRCodeService {
    */
   isValidQRCodeFormat(qrCodeData) {
     const regex = /^\d+_\d{5}$/;
-    return regex.test(qrCodeData);
-  }
-
-  /**
-   * Extract user ID from QR code data
-   */
-  extractUserIdFromQRCode(qrCodeData) {
-    const parts = qrCodeData.split('_');
-    if (parts.length !== 2) {
-      return null;
-    }
-    
-    const userId = parseInt(parts[0]);
-    return isNaN(userId) ? null : userId;
+    const isValid = regex.test(qrCodeData);
+    console.log(`[QR_CODE_SERVICE] Format validation for ${qrCodeData}: ${isValid}`);
+    return isValid;
   }
 }
 

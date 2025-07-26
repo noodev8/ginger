@@ -42,23 +42,35 @@ class PointsService {
     required int pointsAmount,
     String? description,
   }) async {
+    print('💰 [POINTS_SERVICE] Adding $pointsAmount points to user $userId by staff $staffUserId');
+
     // Validate input parameters
     if (userId <= 0) {
+      print('❌ [POINTS_SERVICE] Invalid user ID: $userId');
       throw ArgumentError('User ID must be positive');
     }
     if (staffUserId <= 0) {
+      print('❌ [POINTS_SERVICE] Invalid staff user ID: $staffUserId');
       throw ArgumentError('Staff user ID must be positive');
     }
     if (pointsAmount <= 0) {
+      print('❌ [POINTS_SERVICE] Invalid points amount: $pointsAmount');
       throw ArgumentError('Points amount must be positive');
     }
 
     try {
       final token = await _storage.read(key: 'auth_token');
-      if (token == null) throw Exception('No auth token found');
+      if (token == null) {
+        print('❌ [POINTS_SERVICE] No auth token found');
+        throw Exception('No auth token found');
+      }
+      print('🔑 [POINTS_SERVICE] Auth token found');
+
+      final url = '${ApiConfig.baseUrl}${ApiConfig.addPointsEndpoint}';
+      print('📡 [POINTS_SERVICE] Making request to: $url');
 
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}${ApiConfig.addPointsEndpoint}'),
+        Uri.parse(url),
         headers: ApiConfig.getAuthHeaders(token),
         body: jsonEncode({
           'user_id': userId,
@@ -68,26 +80,24 @@ class PointsService {
         }),
       ).timeout(ApiConfig.requestTimeout);
 
+      print('📡 [POINTS_SERVICE] Response status: ${response.statusCode}');
+      print('📡 [POINTS_SERVICE] Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['return_code'] == 'SUCCESS') {
+          print('✅ [POINTS_SERVICE] Points added successfully');
           return true;
         } else {
-          if (kDebugMode) {
-            print('Add points failed: ${responseData['message'] ?? 'Unknown error'}');
-          }
+          print('❌ [POINTS_SERVICE] Add points failed: ${responseData['message'] ?? 'Unknown error'}');
           return false;
         }
       } else {
-        if (kDebugMode) {
-          print('Add points server error: ${response.statusCode}');
-        }
+        print('❌ [POINTS_SERVICE] Add points server error: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Add points error: $e');
-      }
+      print('💥 [POINTS_SERVICE] Add points error: $e');
       rethrow; // Re-throw to let the caller handle the error
     }
   }
@@ -121,20 +131,31 @@ class PointsService {
 
   /// Check if a QR code has been scanned recently (prevent duplicate scans)
   Future<bool> canScanQRCode(String qrCodeData, int staffUserId) async {
+    print('⏰ [POINTS_SERVICE] Checking if QR code can be scanned: $qrCodeData by staff $staffUserId');
+
     // Validate input parameters
     if (qrCodeData.isEmpty) {
+      print('❌ [POINTS_SERVICE] QR code data is empty');
       throw ArgumentError('QR code data cannot be empty');
     }
     if (staffUserId <= 0) {
+      print('❌ [POINTS_SERVICE] Invalid staff user ID: $staffUserId');
       throw ArgumentError('Staff user ID must be positive');
     }
 
     try {
       final token = await _storage.read(key: 'auth_token');
-      if (token == null) throw Exception('No auth token found');
+      if (token == null) {
+        print('❌ [POINTS_SERVICE] No auth token found');
+        throw Exception('No auth token found');
+      }
+      print('🔑 [POINTS_SERVICE] Auth token found');
+
+      final url = '${ApiConfig.baseUrl}${ApiConfig.canScanEndpoint}';
+      print('📡 [POINTS_SERVICE] Making request to: $url');
 
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}${ApiConfig.canScanEndpoint}'),
+        Uri.parse(url),
         headers: ApiConfig.getAuthHeaders(token),
         body: jsonEncode({
           'qr_code_data': qrCodeData,
@@ -142,26 +163,25 @@ class PointsService {
         }),
       ).timeout(ApiConfig.requestTimeout);
 
+      print('📡 [POINTS_SERVICE] Response status: ${response.statusCode}');
+      print('📡 [POINTS_SERVICE] Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['return_code'] == 'SUCCESS') {
-          return responseData['can_scan'] == true;
+          final canScan = responseData['can_scan'] == true;
+          print('✅ [POINTS_SERVICE] Can scan result: $canScan');
+          return canScan;
         } else {
-          if (kDebugMode) {
-            print('Can scan check failed: ${responseData['message'] ?? 'Unknown error'}');
-          }
+          print('❌ [POINTS_SERVICE] Can scan check failed: ${responseData['message'] ?? 'Unknown error'}');
           return false;
         }
       } else {
-        if (kDebugMode) {
-          print('Can scan server error: ${response.statusCode}');
-        }
+        print('❌ [POINTS_SERVICE] Can scan server error: ${response.statusCode} - ${response.body}');
         return false;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Can scan QR code error: $e');
-      }
+      print('💥 [POINTS_SERVICE] Can scan QR code error: $e');
       // For safety, if we can't check, assume we can't scan
       return false;
     }

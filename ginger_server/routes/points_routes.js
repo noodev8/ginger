@@ -80,10 +80,10 @@ router.post('/add', authenticateToken, requireStaff, async (req, res) => {
     }
 
     const result = await pointsService.addPointsToUser(
-      user_id, 
-      staff_user_id, 
-      points_amount, 
-      description || 'QR code scan'
+      user_id,
+      staff_user_id,
+      points_amount,
+      description || 'Points added by staff'
     );
 
     res.json({
@@ -121,49 +121,6 @@ router.get('/transactions/:userId', authenticateToken, requireOwnershipOrStaff('
     });
   } catch (error) {
     console.error('Get transactions error:', error);
-    res.status(500).json({
-      return_code: 'SERVER_ERROR',
-      message: 'Internal server error'
-    });
-  }
-});
-
-/*
-=======================================================================================================================================
-API Route: /points/can-scan
-=======================================================================================================================================
-Method: POST
-Purpose: Check if QR code can be scanned (prevent duplicates) - staff only
-=======================================================================================================================================
-*/
-router.post('/can-scan', authenticateToken, requireStaff, async (req, res) => {
-  try {
-    const { qr_code_data, staff_user_id } = req.body;
-
-    if (!qr_code_data || !staff_user_id) {
-      return res.status(400).json({
-        return_code: 'MISSING_REQUIRED_FIELDS',
-        message: 'qr_code_data and staff_user_id are required'
-      });
-    }
-
-    // Verify the staff_user_id matches the authenticated user
-    if (req.user.id !== staff_user_id) {
-      return res.status(403).json({
-        return_code: 'ACCESS_DENIED',
-        message: 'Staff user ID mismatch'
-      });
-    }
-
-    const result = await pointsService.canScanQRCode(qr_code_data, staff_user_id);
-
-    res.json({
-      return_code: 'SUCCESS',
-      can_scan: result.can_scan,
-      message: result.message
-    });
-  } catch (error) {
-    console.error('Can scan check error:', error);
     res.status(500).json({
       return_code: 'SERVER_ERROR',
       message: 'Internal server error'

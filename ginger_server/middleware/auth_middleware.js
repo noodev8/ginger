@@ -1,77 +1,94 @@
-const authService = require('../services/auth_service');
+const jwt = require('jsonwebtoken');
+const database = require('../services/database');
 
 /**
- * Middleware to authenticate JWT token
+ * Middleware to verify JWT token
  */
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
+    console.log(`[AUTH] Authenticating token for ${req.method} ${req.path}`);
+
     if (!token) {
+      console.log('[AUTH] No token provided');
       return res.status(401).json({
-        return_code: 'MISSING_TOKEN',
-        message: 'Access token is required'
+        return_code: 'ERROR',
+        message: 'Access token required'
       });
     }
 
-    // Validate token and get user
-    const user = await authService.validateToken(token);
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(`[AUTH] Token decoded for user ${decoded.userId}`);
+
+    // Get user from database
+    const result = await database.query(
+      'SELECT id, email, display_name, staff FROM app_user WHERE id = $1',
+      [decoded.userId]
+    );
+
+    if (result.rows.length === 0) {
+      console.log(`[AUTH] User ${decoded.userId} not found in database`);
+      return res.status(401).json({
+        return_code: 'ERROR',
+        message: 'Invalid token'
+      });
+    }
+
+    req.user = result.rows[0];
+    console.log(`[AUTH] Authenticated user:`, { 
+      id: req.user.id, 
+      email: req.user.email, 
+      staff: req.user.staff 
+    });
     
-    // Add user to request object
-    req.user = user;
     next();
   } catch (error) {
-    console.error('Authentication error:', error.message);
-    
+    console.error('[AUTH] Token verification error:', error.message);
     return res.status(401).json({
-      return_code: 'INVALID_TOKEN',
-      message: 'Invalid or expired token'
+      return_code: 'ERROR',
+      message: 'Invalid token'
     });
   }
 };
 
 /**
- * Middleware to check if user is staff
+ * Middleware to require staff privileges
  */
 const requireStaff = (req, res, next) => {
-  if (!req.user || !req.user.staff) {
+  console.log(`[AUTH] Checking staff privileges for user ${req.user.id}`);
+  
+  if (!req.user.staff) {
+    console.log(`[AUTH] Access denied - user ${req.user.id} is not staff`);
     return res.status(403).json({
-      return_code: 'ACCESS_DENIED',
-      message: 'Staff access required'
+      return_code: 'ERROR',
+      message: 'Staff privileges required'
     });
   }
+
+  console.log(`[AUTH] Staff access granted for user ${req.user.id}`);
   next();
 };
 
 /**
- * Middleware to check if user is staff admin
+ * Middleware to require ownership or staff privileges
  */
-const requireStaffAdmin = (req, res, next) => {
-  if (!req.user || !req.user.staff_admin) {
-    return res.status(403).json({
-      return_code: 'ACCESS_DENIED',
-      message: 'Staff admin access required'
-    });
-  }
-  next();
-};
-
-/**
- * Middleware to check if user can access resource (own resource or staff)
- */
-const requireOwnershipOrStaff = (userIdParam = 'userId') => {
+const requireOwnershipOrStaff = (paramName) => {
   return (req, res, next) => {
-    const resourceUserId = parseInt(req.params[userIdParam]);
-    const currentUserId = req.user.id;
-    const isStaff = req.user.staff;
-
-    if (currentUserId !== resourceUserId && !isStaff) {
+    const resourceUserId = parseInt(req.params[paramName]);
+    console.log(`[AUTH] Checking ownership/staff for resource user ${resourceUserId}, auth user ${req.user.id}`);
+    
+    if (req.user.id !== resourceUserId && !req.user.staff) {
+      console.log(`[AUTH] Access denied - user ${req.user.id} cannot access resource for user ${resourceUserId}`);
       return res.status(403).json({
-        return_code: 'ACCESS_DENIED',
-        message: 'You can only access your own resources'
+        return_code: 'ERROR',
+        message: 'Access denied'
       });
     }
+
+    console.log(`[AUTH] Access granted for user ${req.user.id} to resource ${resourceUserId}`);
     next();
   };
 };
@@ -79,6 +96,6 @@ const requireOwnershipOrStaff = (userIdParam = 'userId') => {
 module.exports = {
   authenticateToken,
   requireStaff,
-  requireStaffAdmin,
   requireOwnershipOrStaff
 };
+

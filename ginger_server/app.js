@@ -11,8 +11,8 @@ const database = require('./services/database');
 // Import routes
 const augmentRoutes = require('./routes/augmentRoutes');
 const authRoutes = require('./routes/auth_routes');
-const qrCodeRoutes = require('./routes/qr_code_routes');
 const pointsRoutes = require('./routes/points_routes');
+const qrRoutes = require('./routes/qr_routes');
 
 // Create Express app
 const app = express();
@@ -44,8 +44,8 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/auth', authRoutes);
 app.use('/augment', augmentRoutes);
-app.use('/qr-codes', qrCodeRoutes);
 app.use('/points', pointsRoutes);
+app.use('/qr', qrRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
