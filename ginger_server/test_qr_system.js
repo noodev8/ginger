@@ -7,37 +7,20 @@ async function testQRSystem() {
   try {
     console.log('🧪 Testing QR System\n');
 
-    // Step 1: Login as staff (we'll need to check what password works)
+    // Step 1: Login as staff
     console.log('1. Logging in as staff...');
-
-    // Try different credentials
-    let loginResponse;
-    const credentials = [
-      { email: 'summer.louise2906@gmail.com', password: 'password123' },
-      { email: 'summer.louise2906@gmail.com', password: 'Summer.louise2906@gmail.com' },
-      { email: 'teststaff@test.com', password: 'password123' }
-    ];
-
-    for (const cred of credentials) {
-      try {
-        console.log(`Trying ${cred.email}...`);
-        loginResponse = await axios.post(`${BASE_URL}/auth/login`, cred);
-        if (loginResponse.data.return_code === 'SUCCESS') {
-          console.log(`✅ Login successful with ${cred.email}`);
-          break;
-        }
-      } catch (e) {
-        console.log(`❌ Failed with ${cred.email}`);
-      }
-    }
+    const loginResponse = await axios.post(`${BASE_URL}/auth/login`, {
+      email: 'staff@test.com',
+      password: 'password123'
+    });
 
     if (loginResponse.data.return_code !== 'SUCCESS') {
       console.log('❌ Login failed:', loginResponse.data);
       return;
     }
 
-    const token = loginResponse.data.token;
     const staffUser = loginResponse.data.user;
+    const token = staffUser.auth_token;
     console.log(`✅ Logged in as: ${staffUser.email} (Staff: ${staffUser.staff})`);
 
     const headers = {
@@ -47,7 +30,7 @@ async function testQRSystem() {
 
     // Step 2: Get a customer's QR code
     console.log('\n2. Getting customer QR code...');
-    const customerId = 1; // Test with user ID 1
+    const customerId = 8; // Test with user ID 8
     
     const qrResponse = await axios.get(`${BASE_URL}/qr/user/${customerId}`, { headers });
     
@@ -89,14 +72,22 @@ async function testQRSystem() {
 
     // Step 5: Try scanning again (should fail due to cooldown)
     console.log('\n5. Testing cooldown (scanning again immediately)...');
-    const scanResponse2 = await axios.post(`${BASE_URL}/qr/scan`, {
-      qr_code_data: qrCode.qr_code_data
-    }, { headers });
+    try {
+      const scanResponse2 = await axios.post(`${BASE_URL}/qr/scan`, {
+        qr_code_data: qrCode.qr_code_data
+      }, { headers });
 
-    if (scanResponse2.data.return_code === 'SCAN_FAILED') {
-      console.log('✅ Cooldown working correctly:', scanResponse2.data.message);
-    } else {
-      console.log('⚠️ Unexpected result:', scanResponse2.data);
+      if (scanResponse2.data.return_code === 'SCAN_FAILED') {
+        console.log('✅ Cooldown working correctly:', scanResponse2.data.message);
+      } else {
+        console.log('⚠️ Unexpected result:', scanResponse2.data);
+      }
+    } catch (error) {
+      if (error.response?.status === 400 && error.response?.data?.return_code === 'SCAN_FAILED') {
+        console.log('✅ Cooldown working correctly:', error.response.data.message);
+      } else {
+        console.log('❌ Unexpected error:', error.response?.data || error.message);
+      }
     }
 
     console.log('\n🎉 QR System test completed!');

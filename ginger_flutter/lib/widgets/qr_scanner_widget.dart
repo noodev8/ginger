@@ -47,6 +47,13 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
             'success': false,
             'message': 'Error: $e',
           });
+        } finally {
+          // Reset processing state after scan completes
+          if (mounted) {
+            setState(() {
+              _isProcessing = false;
+            });
+          }
         }
 
         break;

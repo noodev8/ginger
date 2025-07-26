@@ -93,7 +93,8 @@ class AuthController {
       res.status(200).json({
         return_code: 'SUCCESS',
         message: 'Login successful',
-        user: user
+        user: user,
+        token: user.auth_token
       });
 
     } catch (error) {

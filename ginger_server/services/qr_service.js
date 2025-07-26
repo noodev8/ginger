@@ -119,20 +119,20 @@ class QRService {
         };
       }
       
-      // Check for recent scans (prevent spam - 30 second cooldown)
+      // Check for recent scans (prevent spam - 15 second cooldown)
       const recentScanResult = await database.query(
-        `SELECT * FROM point_transactions 
-         WHERE user_id = $1 AND scanned_by = $2 
-         AND transaction_date > NOW() - INTERVAL '30 seconds'
+        `SELECT * FROM point_transactions
+         WHERE user_id = $1 AND scanned_by = $2
+         AND transaction_date > NOW() - INTERVAL '15 seconds'
          ORDER BY transaction_date DESC LIMIT 1`,
         [validation.user_id, staffUserId]
       );
-      
+
       if (recentScanResult.rows.length > 0) {
         console.log(`[QR_SERVICE] Recent scan detected, blocking duplicate`);
         return {
           success: false,
-          message: 'QR code scanned too recently. Please wait 30 seconds.'
+          message: 'QR code scanned too recently. Please wait 15 seconds.'
         };
       }
       

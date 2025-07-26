@@ -1,5 +1,4 @@
-const jwt = require('jsonwebtoken');
-const database = require('../services/database');
+const authService = require('../services/auth_service');
 
 /**
  * Middleware to verify JWT token
@@ -19,25 +18,10 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(`[AUTH] Token decoded for user ${decoded.userId}`);
+    // Use auth service to validate token (same as /auth/validate endpoint)
+    const user = await authService.validateToken(token);
 
-    // Get user from database
-    const result = await database.query(
-      'SELECT id, email, display_name, staff FROM app_user WHERE id = $1',
-      [decoded.userId]
-    );
-
-    if (result.rows.length === 0) {
-      console.log(`[AUTH] User ${decoded.userId} not found in database`);
-      return res.status(401).json({
-        return_code: 'ERROR',
-        message: 'Invalid token'
-      });
-    }
-
-    req.user = result.rows[0];
+    req.user = user;
     console.log(`[AUTH] Authenticated user:`, { 
       id: req.user.id, 
       email: req.user.email, 
