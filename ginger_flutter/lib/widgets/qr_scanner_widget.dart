@@ -15,6 +15,8 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
   final MobileScannerController _controller = MobileScannerController();
   final QRService _qrService = QRService();
   bool _isProcessing = false;
+  String? _lastScannedCode;
+  DateTime? _lastScanTime;
 
   @override
   void dispose() {
@@ -28,12 +30,25 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
     final List<Barcode> barcodes = capture.barcodes;
     for (final barcode in barcodes) {
       if (barcode.rawValue != null) {
+        final currentCode = barcode.rawValue!;
+        final now = DateTime.now();
+
+        // Prevent scanning the same code within 3 seconds
+        if (_lastScannedCode == currentCode &&
+            _lastScanTime != null &&
+            now.difference(_lastScanTime!).inSeconds < 3) {
+          return;
+        }
+
         setState(() {
           _isProcessing = true;
         });
 
+        _lastScannedCode = currentCode;
+        _lastScanTime = now;
+
         try {
-          final result = await _qrService.scanQRCode(barcode.rawValue!);
+          final result = await _qrService.scanQRCode(currentCode);
           if (result != null) {
             widget.onScanResult(result);
           } else {
@@ -48,10 +63,14 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
             'message': 'Error: $e',
           });
         } finally {
-          // Reset processing state after scan completes
+          // Reset processing state after a delay to allow for next scan
           if (mounted) {
-            setState(() {
-              _isProcessing = false;
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                setState(() {
+                  _isProcessing = false;
+                });
+              }
             });
           }
         }
