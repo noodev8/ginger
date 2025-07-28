@@ -119,12 +119,21 @@ router.post('/scan', authenticateToken, requireStaff, async (req, res) => {
     const result = await qrService.scanQRCode(qr_code_data, staffUserId);
     
     if (result.success) {
-      res.json({
+      const response = {
         return_code: 'SUCCESS',
         message: result.message,
         user_name: result.user_name,
         new_total: result.new_total
-      });
+      };
+
+      // Add reward eligibility information if present
+      if (result.reward_eligible !== undefined) {
+        response.reward_eligible = result.reward_eligible;
+        response.user_id = result.user_id;
+        response.current_points = result.current_points;
+      }
+
+      res.json(response);
     } else {
       res.status(400).json({
         return_code: 'SCAN_FAILED',
@@ -133,6 +142,49 @@ router.post('/scan', authenticateToken, requireStaff, async (req, res) => {
     }
   } catch (error) {
     console.error('Scan QR code error:', error);
+    res.status(500).json({
+      return_code: 'SERVER_ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /qr/redeem-reward
+=======================================================================================================================================
+Method: POST
+Purpose: Redeem reward (deduct 10 points, add 1 point for current scan) - staff only
+=======================================================================================================================================
+*/
+router.post('/redeem-reward', authenticateToken, requireStaff, async (req, res) => {
+  try {
+    const { user_id } = req.body;
+    const staffUserId = req.user.id;
+
+    if (!user_id) {
+      return res.status(400).json({
+        return_code: 'MISSING_USER_ID',
+        message: 'user_id is required'
+      });
+    }
+
+    const result = await qrService.redeemReward(user_id, staffUserId);
+
+    if (result.success) {
+      res.json({
+        return_code: 'SUCCESS',
+        message: result.message,
+        new_total: result.new_total
+      });
+    } else {
+      res.status(400).json({
+        return_code: 'REDEEM_FAILED',
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('Redeem reward error:', error);
     res.status(500).json({
       return_code: 'SERVER_ERROR',
       message: 'Internal server error'

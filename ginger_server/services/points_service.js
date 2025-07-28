@@ -34,13 +34,13 @@ class PointsService {
   }
 
   /**
-   * Add points to a user (by staff)
+   * Add points to a user (by staff) - supports negative amounts for deductions
    */
   async addPointsToUser(userId, staffUserId, pointsAmount, description = 'Points added by staff') {
     console.log(`[POINTS_SERVICE] Starting add points transaction - User: ${userId}, Staff: ${staffUserId}, Points: ${pointsAmount}`);
-    
+
     const client = await database.getClient();
-    
+
     try {
       await client.query('BEGIN');
       console.log('[POINTS_SERVICE] Transaction started');
@@ -54,16 +54,19 @@ class PointsService {
       let currentPoints = 0;
       if (pointsResult.rows.length === 0) {
         console.log(`[POINTS_SERVICE] Creating new points record for user ${userId}`);
-        // Create new record
+        // Create new record - ensure we don't create negative points for new users
+        const initialPoints = Math.max(0, pointsAmount);
         await client.query(
           'INSERT INTO loyalty_points (user_id, current_points) VALUES ($1, $2)',
-          [userId, pointsAmount]
+          [userId, initialPoints]
         );
-        currentPoints = pointsAmount;
+        currentPoints = initialPoints;
       } else {
         console.log(`[POINTS_SERVICE] Updating existing points record. Current: ${pointsResult.rows[0].current_points}`);
         // Update existing record
         currentPoints = pointsResult.rows[0].current_points + pointsAmount;
+        // Ensure points don't go below 0
+        currentPoints = Math.max(0, currentPoints);
         await client.query(
           'UPDATE loyalty_points SET current_points = $1, last_updated = NOW() WHERE user_id = $2',
           [currentPoints, userId]

@@ -109,7 +109,7 @@ class QRService {
   async scanQRCode(qrCodeData, staffUserId) {
     try {
       console.log(`[QR_SERVICE] Processing QR scan: ${qrCodeData} by staff: ${staffUserId}`);
-      
+
       // Validate QR code
       const validation = await this.validateQRCode(qrCodeData);
       if (!validation) {
@@ -118,7 +118,7 @@ class QRService {
           message: 'Invalid QR code or user not found'
         };
       }
-      
+
       // Check for recent scans (prevent spam - 15 second cooldown)
       const recentScanResult = await database.query(
         `SELECT * FROM point_transactions
@@ -135,32 +135,115 @@ class QRService {
           message: 'QR code scanned too recently. Please wait 15 seconds.'
         };
       }
-      
-      // Add points using existing points service
+
+      // Get current points to check for reward eligibility
       const pointsService = require('./points_service');
-      const result = await pointsService.addPointsToUser(
-        validation.user_id,
-        staffUserId,
-        1,
-        'QR code scan'
-      );
-      
-      if (result.success) {
-        console.log(`[QR_SERVICE] Successfully added 1 point to user ${validation.user_id}`);
+      const currentPoints = await pointsService.getUserPoints(validation.user_id);
+      const pointsTotal = currentPoints ? currentPoints.current_points : 0;
+
+      console.log(`[QR_SERVICE] User ${validation.user_id} has ${pointsTotal} points`);
+
+      // Check if user has enough points for a reward (10 points = 1 free coffee)
+      if (pointsTotal >= 10) {
+        console.log(`[QR_SERVICE] User eligible for reward with ${pointsTotal} points`);
         return {
           success: true,
-          message: `Added 1 point to ${validation.user_name}`,
+          reward_eligible: true,
+          user_id: validation.user_id,
           user_name: validation.user_name,
-          new_total: result.new_total
+          current_points: pointsTotal,
+          message: `${validation.user_name} has ${pointsTotal} points and is eligible for a free coffee!`
+        };
+      } else {
+        // Add 1 point as normal
+        const result = await pointsService.addPointsToUser(
+          validation.user_id,
+          staffUserId,
+          1,
+          'QR code scan'
+        );
+
+        if (result.success) {
+          console.log(`[QR_SERVICE] Successfully added 1 point to user ${validation.user_id}`);
+          return {
+            success: true,
+            reward_eligible: false,
+            message: `Added 1 point to ${validation.user_name}`,
+            user_name: validation.user_name,
+            new_total: result.new_total
+          };
+        } else {
+          return {
+            success: false,
+            message: 'Failed to add points'
+          };
+        }
+      }
+    } catch (error) {
+      console.error('[QR_SERVICE] Scan QR code error:', error.message);
+      return {
+        success: false,
+        message: 'Internal server error'
+      };
+    }
+  }
+
+  /**
+   * Redeem reward (deduct 10 points and add 1 point for current scan)
+   */
+  async redeemReward(userId, staffUserId) {
+    try {
+      console.log(`[QR_SERVICE] Processing reward redemption for user: ${userId} by staff: ${staffUserId}`);
+
+      const pointsService = require('./points_service');
+
+      // Get current points to verify eligibility
+      const currentPoints = await pointsService.getUserPoints(userId);
+      if (!currentPoints || currentPoints.current_points < 10) {
+        return {
+          success: false,
+          message: 'User does not have enough points for a reward'
+        };
+      }
+
+      // Deduct 10 points for the reward
+      const deductResult = await pointsService.addPointsToUser(
+        userId,
+        staffUserId,
+        -10,
+        'Free coffee reward redeemed'
+      );
+
+      if (!deductResult.success) {
+        return {
+          success: false,
+          message: 'Failed to deduct points for reward'
+        };
+      }
+
+      // Add 1 point for the current scan
+      const addResult = await pointsService.addPointsToUser(
+        userId,
+        staffUserId,
+        1,
+        'QR code scan (after reward redemption)'
+      );
+
+      if (addResult.success) {
+        console.log(`[QR_SERVICE] Successfully redeemed reward for user ${userId}. New total: ${addResult.new_total}`);
+        return {
+          success: true,
+          message: 'Free coffee reward redeemed successfully!',
+          new_total: addResult.new_total
         };
       } else {
         return {
           success: false,
-          message: 'Failed to add points'
+          message: 'Failed to add scan point after reward redemption'
         };
       }
     } catch (error) {
-      console.error('[QR_SERVICE] Scan QR code error:', error.message);
+      console.error('[QR_SERVICE] Redeem reward error:', error.message);
       return {
         success: false,
         message: 'Internal server error'

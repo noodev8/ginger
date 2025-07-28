@@ -71,11 +71,11 @@ router.post('/add', authenticateToken, requireStaff, async (req, res) => {
       });
     }
 
-    // Validate points amount
-    if (points_amount <= 0 || !Number.isInteger(points_amount)) {
+    // Validate points amount - allow negative amounts for deductions
+    if (!Number.isInteger(points_amount)) {
       return res.status(400).json({
         return_code: 'INVALID_INPUT',
-        message: 'Points amount must be a positive integer'
+        message: 'Points amount must be an integer'
       });
     }
 

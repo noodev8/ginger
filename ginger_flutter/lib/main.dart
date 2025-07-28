@@ -5,6 +5,8 @@ import 'account_page.dart';
 import 'rewards_page.dart';
 import 'login_page.dart';
 import 'providers/auth_provider.dart';
+import 'services/qr_service.dart';
+import 'services/points_service.dart';
 import 'widgets/qr_scanner_widget.dart';
 import 'widgets/user_qr_widget.dart';
 import 'widgets/points_display_widget.dart';
@@ -298,10 +300,19 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _handleScanResult(Map<String, dynamic> result) {
     if (result['success'] == true) {
-      _showSuccessDialog(
-        result['user_name'] ?? 'Customer',
-        result['new_total']?.toString() ?? '0',
-      );
+      // Check if customer is eligible for a reward
+      if (result['reward_eligible'] == true) {
+        _showRewardDialog(
+          result['user_name'] ?? 'Customer',
+          result['current_points'] ?? 0,
+          result['user_id'],
+        );
+      } else {
+        _showSuccessDialog(
+          result['user_name'] ?? 'Customer',
+          result['new_total']?.toString() ?? '0',
+        );
+      }
     } else {
       _showErrorDialog(result['message'] ?? 'Scan failed');
     }
@@ -360,6 +371,73 @@ class _HomeWidgetState extends State<HomeWidget> {
                 'OK',
                 style: TextStyle(color: Color(0xFF8B7355)),
               ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRewardDialog(String userName, int currentPoints, int userId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Reward Available!',
+            style: TextStyle(
+              color: Color(0xFF8B7355),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.local_cafe,
+                color: Color(0xFF8B7355),
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '$userName has $currentPoints points',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Would you like to redeem 10 points for a free coffee?',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Add 1 point as normal (no reward redemption)
+                _addNormalPoint(userId, userName);
+              },
+              child: const Text(
+                'No, Add 1 Point',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Redeem reward
+                _redeemReward(userId, userName);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B7355),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Yes, Redeem Free Coffee'),
             ),
           ],
         );
@@ -496,6 +574,112 @@ class _HomeWidgetState extends State<HomeWidget> {
         content: Text('Staff access is now controlled by your account permissions'),
         backgroundColor: Color(0xFF8B7355), // Darker beige
       ),
+    );
+  }
+
+  void _addNormalPoint(int userId, String userName) async {
+    try {
+      final pointsService = PointsService();
+      final currentUser = Provider.of<AuthProvider>(context, listen: false).currentUser;
+
+      if (currentUser == null || currentUser.id == null) {
+        _showErrorDialog('Authentication error');
+        return;
+      }
+
+      final success = await pointsService.addPointsToUser(
+        userId: userId,
+        staffUserId: currentUser.id!,
+        pointsAmount: 1,
+        description: 'QR code scan',
+      );
+
+      if (success) {
+        // Get updated points total
+        final updatedPoints = await pointsService.getUserPoints(userId);
+        final newTotal = updatedPoints?.currentPoints ?? 0;
+
+        _showSuccessDialog(userName, newTotal.toString());
+      } else {
+        _showErrorDialog('Failed to add points');
+      }
+    } catch (e) {
+      _showErrorDialog('Error adding points: $e');
+    }
+  }
+
+  void _redeemReward(int userId, String userName) async {
+    try {
+      final qrService = QRService();
+      final result = await qrService.redeemReward(userId);
+
+      if (result != null && result['success'] == true) {
+        _showRewardSuccessDialog(userName, result['new_total']?.toString() ?? '0');
+      } else {
+        _showErrorDialog(result?['message'] ?? 'Failed to redeem reward');
+      }
+    } catch (e) {
+      _showErrorDialog('Error redeeming reward: $e');
+    }
+  }
+
+  void _showRewardSuccessDialog(String userName, String newTotal) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Free Coffee Redeemed!',
+            style: TextStyle(
+              color: Color(0xFF8B7355),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Customer: $userName',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Free coffee redeemed successfully!',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'New total: $newTotal points',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF8B7355)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -686,7 +870,6 @@ class _HomeWidgetState extends State<HomeWidget> {
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
                   final user = authProvider.currentUser;
-                  final isStaff = user?.staff ?? false;
 
                   return Column(
                     children: [

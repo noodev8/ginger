@@ -72,13 +72,16 @@ class QRService {
       ).timeout(ApiConfig.requestTimeout);
 
       final responseData = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200 && responseData['return_code'] == 'SUCCESS') {
         return {
           'success': true,
           'message': responseData['message'],
           'user_name': responseData['user_name'],
           'new_total': responseData['new_total'],
+          'reward_eligible': responseData['reward_eligible'] ?? false,
+          'user_id': responseData['user_id'],
+          'current_points': responseData['current_points'],
         };
       } else {
         return {
@@ -88,6 +91,43 @@ class QRService {
       }
     } catch (e) {
       print('Scan QR code error: $e');
+      return {
+        'success': false,
+        'message': 'Network error: $e',
+      };
+    }
+  }
+
+  /// Redeem reward for a user (deduct 10 points, add 1 point for current scan)
+  Future<Map<String, dynamic>?> redeemReward(int userId) async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/qr/redeem-reward'),
+        headers: ApiConfig.getAuthHeaders(token),
+        body: jsonEncode({
+          'user_id': userId,
+        }),
+      ).timeout(ApiConfig.requestTimeout);
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['return_code'] == 'SUCCESS') {
+        return {
+          'success': true,
+          'message': responseData['message'],
+          'new_total': responseData['new_total'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Redemption failed',
+        };
+      }
+    } catch (e) {
+      print('Redeem reward error: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
