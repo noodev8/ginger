@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/points_service.dart';
-import '../models/loyalty_points.dart';
+import 'package:provider/provider.dart';
+import '../providers/points_provider.dart';
 
 class PointsDisplayWidget extends StatefulWidget {
   final int userId;
@@ -12,55 +12,35 @@ class PointsDisplayWidget extends StatefulWidget {
 }
 
 class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
-  final PointsService _pointsService = PointsService();
-  LoyaltyPoints? _loyaltyPoints;
-  bool _isLoading = true;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadPoints();
-  }
-
-  Future<void> _loadPoints() async {
-    try {
-      final points = await _pointsService.getUserPoints(widget.userId);
-      if (mounted) {
-        setState(() {
-          _loyaltyPoints = points;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _refreshPoints() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
+    // Load points when widget initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+      pointsProvider.loadUserPoints(widget.userId);
     });
-    await _loadPoints();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return _buildLoadingState();
-    }
+    return Consumer<PointsProvider>(
+      builder: (context, pointsProvider, child) {
+        final isLoading = pointsProvider.isLoading(widget.userId);
+        final error = pointsProvider.getError(widget.userId);
+        final loyaltyPoints = pointsProvider.getUserPoints(widget.userId);
 
-    if (_error != null || _loyaltyPoints == null) {
-      return _buildErrorState();
-    }
+        if (isLoading) {
+          return _buildLoadingState();
+        }
 
-    return _buildPointsDisplay();
+        if (error != null || loyaltyPoints == null) {
+          return _buildErrorState(pointsProvider);
+        }
+
+        return _buildPointsDisplay(loyaltyPoints);
+      },
+    );
   }
 
   Widget _buildLoadingState() {
@@ -100,7 +80,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
     );
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(PointsProvider pointsProvider) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -131,7 +111,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: _refreshPoints,
+              onPressed: () => pointsProvider.refreshUserPoints(widget.userId),
               child: const Text(
                 'Retry',
                 style: TextStyle(color: Color(0xFF8B7355)),
@@ -143,8 +123,8 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
     );
   }
 
-  Widget _buildPointsDisplay() {
-    final currentPoints = _loyaltyPoints!.currentPoints;
+  Widget _buildPointsDisplay(loyaltyPoints) {
+    final currentPoints = loyaltyPoints.currentPoints;
     final pointsToNextReward = 10 - (currentPoints % 10);
     final progress = (currentPoints % 10) / 10.0;
 

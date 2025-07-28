@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
-import 'services/points_service.dart';
-import 'models/loyalty_points.dart';
+import 'providers/points_provider.dart';
 
 class RewardsPage extends StatefulWidget {
   const RewardsPage({Key? key}) : super(key: key);
@@ -12,124 +11,107 @@ class RewardsPage extends StatefulWidget {
 }
 
 class _RewardsPageState extends State<RewardsPage> {
-  final PointsService _pointsService = PointsService();
-  LoyaltyPoints? _loyaltyPoints;
-  bool _isLoading = true;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadPoints();
-  }
+    // Load points when page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+      final user = authProvider.currentUser;
 
-  Future<void> _loadPoints() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final user = authProvider.currentUser;
-
-    if (user?.id == null) {
-      setState(() {
-        _error = 'User not found';
-        _isLoading = false;
-      });
-      return;
-    }
-
-    try {
-      final points = await _pointsService.getUserPoints(user!.id!);
-      if (mounted) {
-        setState(() {
-          _loyaltyPoints = points;
-          _isLoading = false;
-        });
+      if (user?.id != null) {
+        pointsProvider.loadUserPoints(user!.id!);
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
-      }
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Calculate points data
-    final int currentPoints = _loyaltyPoints?.currentPoints ?? 0;
-    final int pointsNeeded = 10;
-    final bool hasFreeReward = currentPoints >= pointsNeeded;
-    final int pointsToNext = pointsNeeded - currentPoints;
+    return Consumer2<AuthProvider, PointsProvider>(
+      builder: (context, authProvider, pointsProvider, child) {
+        final user = authProvider.currentUser;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
-      appBar: AppBar(
-        title: const Text(
-          'Your Rewards',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color(0xFF8B7355), // Darker beige
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                _isLoading = true;
-                _error = null;
-              });
-              _loadPoints();
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+        if (user?.id == null) {
+          return Scaffold(
+            backgroundColor: const Color(0xFFF7EDE4),
+            appBar: AppBar(
+              title: const Text('Your Rewards'),
+              backgroundColor: const Color(0xFF8B7355),
+            ),
+            body: const Center(
+              child: Text('User not found'),
+            ),
+          );
+        }
+
+        final isLoading = pointsProvider.isLoading(user!.id!);
+        final error = pointsProvider.getError(user.id!);
+        final loyaltyPoints = pointsProvider.getUserPoints(user.id!);
+
+        // Calculate points data
+        final int currentPoints = loyaltyPoints?.currentPoints ?? 0;
+        final int pointsNeeded = 10;
+        final bool hasFreeReward = currentPoints >= pointsNeeded;
+        final int pointsToNext = pointsNeeded - currentPoints;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
+          appBar: AppBar(
+            title: const Text(
+              'Your Rewards',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
-            )
-          : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Unable to load points',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _error!,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _isLoading = true;
-                            _error = null;
-                          });
-                          _loadPoints();
-                        },
+            ),
+            backgroundColor: const Color(0xFF8B7355), // Darker beige
+            iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () => pointsProvider.refreshUserPoints(user.id!),
+              ),
+            ],
+          ),
+          body: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                  ),
+                )
+              : error != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Unable to load points',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            error,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => pointsProvider.refreshUserPoints(user.id!),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF8B7355),
                           foregroundColor: Colors.white,
@@ -291,30 +273,40 @@ class _RewardsPageState extends State<RewardsPage> {
               ),
             ),
 
-            // Redeem Button (only show if has free reward)
+            // Redeem Info (only show if has free reward)
             if (hasFreeReward) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
+                child: Container(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      _showRedeemDialog(context);
-                    },
-                    icon: const Icon(Icons.redeem, color: Colors.white),
-                    label: const Text('Redeem Free Coffee'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green, width: 2),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.local_cafe, color: Colors.green, size: 32),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Free Coffee Available!',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Show your QR code to staff to redeem',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -400,50 +392,7 @@ class _RewardsPageState extends State<RewardsPage> {
         ),
       ),
     );
-  }
-
-  void _showRedeemDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            '🎉 Redeem Free Coffee',
-            style: TextStyle(
-              color: Colors.green,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.local_cafe,
-                color: Colors.green,
-                size: 64,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Show this screen to staff to redeem your free coffee!',
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Close',
-                style: TextStyle(
-                  color: Color(0xFF8B7355), // Darker beige
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+    },
+  );
+}
 }

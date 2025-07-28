@@ -5,6 +5,7 @@ import 'account_page.dart';
 import 'rewards_page.dart';
 import 'login_page.dart';
 import 'providers/auth_provider.dart';
+import 'providers/points_provider.dart';
 import 'services/qr_service.dart';
 import 'services/points_service.dart';
 import 'widgets/qr_scanner_widget.dart';
@@ -23,8 +24,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => PointsProvider()),
+      ],
       child: MaterialApp(
         title: 'Ginger & Co Coffee',
         debugShowCheckedModeBanner: false, // Remove debug banner
@@ -581,6 +585,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final pointsService = PointsService();
       final currentUser = Provider.of<AuthProvider>(context, listen: false).currentUser;
+      final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
 
       if (currentUser == null || currentUser.id == null) {
         _showErrorDialog('Authentication error');
@@ -599,27 +604,46 @@ class _HomeWidgetState extends State<HomeWidget> {
         final updatedPoints = await pointsService.getUserPoints(userId);
         final newTotal = updatedPoints?.currentPoints ?? 0;
 
-        _showSuccessDialog(userName, newTotal.toString());
+        // Refresh points in provider for all UI components
+        await pointsProvider.refreshUserPoints(userId);
+
+        if (mounted) {
+          _showSuccessDialog(userName, newTotal.toString());
+        }
       } else {
-        _showErrorDialog('Failed to add points');
+        if (mounted) {
+          _showErrorDialog('Failed to add points');
+        }
       }
     } catch (e) {
-      _showErrorDialog('Error adding points: $e');
+      if (mounted) {
+        _showErrorDialog('Error adding points: $e');
+      }
     }
   }
 
   void _redeemReward(int userId, String userName) async {
     try {
       final qrService = QRService();
+      final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
       final result = await qrService.redeemReward(userId);
 
       if (result != null && result['success'] == true) {
-        _showRewardSuccessDialog(userName, result['new_total']?.toString() ?? '0');
+        // Refresh points in provider for all UI components
+        await pointsProvider.refreshUserPoints(userId);
+
+        if (mounted) {
+          _showRewardSuccessDialog(userName, result['new_total']?.toString() ?? '0');
+        }
       } else {
-        _showErrorDialog(result?['message'] ?? 'Failed to redeem reward');
+        if (mounted) {
+          _showErrorDialog(result?['message'] ?? 'Failed to redeem reward');
+        }
       }
     } catch (e) {
-      _showErrorDialog('Error redeeming reward: $e');
+      if (mounted) {
+        _showErrorDialog('Error redeeming reward: $e');
+      }
     }
   }
 
