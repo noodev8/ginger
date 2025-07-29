@@ -183,7 +183,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
+                          color: const Color(0xFF3E2723).withValues(alpha: 0.3), // Darker brown shadow
                           blurRadius: 8,
                           spreadRadius: 1,
                           offset: const Offset(0, 2),

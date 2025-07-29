@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
 import 'account_page.dart';
 import 'rewards_page.dart';
 import 'login_page.dart';
@@ -8,10 +9,13 @@ import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
 import 'services/qr_service.dart';
 import 'services/points_service.dart';
+import 'services/points_change_detector.dart';
+import 'services/global_coffee_stamp_controller.dart';
 import 'widgets/qr_scanner_widget.dart';
 import 'widgets/user_qr_widget.dart';
 import 'widgets/points_display_widget.dart';
 import 'widgets/user_points_summary_widget.dart';
+import 'widgets/global_coffee_stamp_overlay.dart';
 
 
 
@@ -36,7 +40,9 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFA0956B)),
           useMaterial3: true,
         ),
-        home: const AuthWrapper(),
+        home: const GlobalCoffeeStampOverlay(
+          child: AuthWrapper(),
+        ),
       ),
     );
   }
@@ -117,20 +123,27 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int _logoTapCount = 0;
+  final PointsChangeDetector _pointsChangeDetector = PointsChangeDetector();
+  final GlobalCoffeeStampController _coffeeStampController = GlobalCoffeeStampController();
+  StreamSubscription<PointsChangeEvent>? _pointsChangeSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
     // Refresh points when the home screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshPointsIfAuthenticated();
+      _setupPointsChangeDetection();
     });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _pointsChangeSubscription?.cancel();
+    _pointsChangeDetector.stopMonitoring();
     super.dispose();
   }
 
@@ -140,6 +153,9 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // Refresh points when app comes to foreground
       _refreshPointsIfAuthenticated();
+      _pointsChangeDetector.resumeMonitoring();
+    } else if (state == AppLifecycleState.paused) {
+      _pointsChangeDetector.pauseMonitoring();
     }
   }
 
@@ -150,6 +166,29 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
     if (user?.id != null) {
       pointsProvider.refreshUserPoints(user!.id!);
+    }
+  }
+
+  void _setupPointsChangeDetection() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+
+    if (user?.id != null) {
+      // Start monitoring points changes
+      _pointsChangeDetector.startMonitoring(user!.id!);
+
+      // Set initial points to avoid false positives
+      final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+      final currentPoints = pointsProvider.getUserPoints(user.id!);
+      if (currentPoints != null) {
+        _pointsChangeDetector.setInitialPoints(currentPoints.currentPoints);
+      }
+
+      // Listen for points changes and trigger global animation
+      _pointsChangeSubscription = _pointsChangeDetector.pointsChangeStream.listen((event) {
+        print('[HomeWidget] Points change detected: ${event.pointsAdded} points added');
+        _coffeeStampController.showPointsAdded(event.pointsAdded);
+      });
     }
   }
 
@@ -822,15 +861,8 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
         backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
         body: SafeArea(
           top: true,
-          child: RefreshIndicator(
-            onRefresh: () async {
-              _refreshPointsIfAuthenticated();
-            },
-            color: const Color(0xFF8B7355),
-            backgroundColor: Colors.white,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
+          child: SingleChildScrollView(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
               // Header Section
@@ -1175,7 +1207,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
 
             ],
-              ),
             ),
           ),
         ),
