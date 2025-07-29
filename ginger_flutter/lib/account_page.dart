@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'providers/auth_provider.dart';
+import 'providers/points_provider.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -10,8 +11,43 @@ class AccountPage extends StatefulWidget {
   State<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
   String? _profileImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Refresh points when page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshPoints();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh points when app comes to foreground
+      _refreshPoints();
+    }
+  }
+
+  void _refreshPoints() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+
+    if (user?.id != null) {
+      pointsProvider.refreshUserPoints(user!.id!);
+    }
+  }
 
   void _showImagePickerOptions() {
     showModalBottomSheet(
@@ -173,8 +209,15 @@ class _AccountPageState extends State<AccountPage> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _refreshPoints();
+          },
+          color: const Color(0xFF8B7355),
+          backgroundColor: Colors.white,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
             children: [
               // Profile Header
               Container(
@@ -281,103 +324,173 @@ class _AccountPageState extends State<AccountPage> {
               // Points Summary Card
               Padding(
                 padding: const EdgeInsets.all(24),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 10,
-                        color: Color(0x1A000000),
-                        offset: Offset(0.0, 5),
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Loyalty Points',
-                          style: TextStyle(
-                            color: Color(0xFF8B4513),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Consumer2<AuthProvider, PointsProvider>(
+                  builder: (context, authProvider, pointsProvider, child) {
+                    final user = authProvider.currentUser;
+                    final isLoading = user?.id != null ? pointsProvider.isLoading(user!.id!) : false;
+                    final error = user?.id != null ? pointsProvider.getError(user!.id!) : null;
+                    final loyaltyPoints = user?.id != null ? pointsProvider.getUserPoints(user!.id!) : null;
+
+                    final currentPoints = loyaltyPoints?.currentPoints ?? 0;
+                    final freeCoffees = currentPoints ~/ 10; // Integer division - how many free coffees earned
+
+                    return Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: const [
+                          BoxShadow(
+                            blurRadius: 10,
+                            color: Color(0x1A000000),
+                            offset: Offset(0.0, 5),
+                          )
+                        ],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
                           children: [
-                            Column(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text(
-                                  '847',
+                                  'Loyalty Points',
                                   style: TextStyle(
-                                    color: Color(0xFF2F1B14),
-                                    fontSize: 32,
+                                    color: Color(0xFF8B4513),
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const Text(
-                                  'Current Points',
-                                  style: TextStyle(
-                                    color: Color(0xFF8B4513),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                                if (user?.id != null)
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.refresh,
+                                      color: Color(0xFF8B4513),
+                                      size: 20,
+                                    ),
+                                    onPressed: () => pointsProvider.refreshUserPoints(user!.id!),
                                   ),
-                                ),
                               ],
                             ),
+                            const SizedBox(height: 16),
+                            if (isLoading)
+                              const Column(
+                                children: [
+                                  CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Loading points...',
+                                    style: TextStyle(
+                                      color: Color(0xFF8B4513),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else if (error != null)
+                              Column(
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: Color(0xFF8B4513),
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Unable to load points',
+                                    style: TextStyle(
+                                      color: Color(0xFF8B4513),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: user?.id != null ? () => pointsProvider.refreshUserPoints(user!.id!) : null,
+                                    child: const Text(
+                                      'Retry',
+                                      style: TextStyle(color: Color(0xFF8B4513)),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        '$currentPoints',
+                                        style: const TextStyle(
+                                          color: Color(0xFF2F1B14),
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'Current Points',
+                                        style: TextStyle(
+                                          color: Color(0xFF8B4513),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 50,
+                                    color: const Color(0xFFE0E0E0),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        '$freeCoffees',
+                                        style: const TextStyle(
+                                          color: Color(0xFF2F1B14),
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'Free Coffees',
+                                        style: TextStyle(
+                                          color: Color(0xFF8B4513),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: 16),
                             Container(
-                              width: 1,
-                              height: 50,
-                              color: const Color(0xFFE0E0E0),
-                            ),
-                            Column(
-                              children: [
-                                const Text(
-                                  '84',
-                                  style: TextStyle(
-                                    color: Color(0xFF2F1B14),
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5DEB3),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                '1 point per scan • 10 points = 1 free coffee',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFF8B4513),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                const Text(
-                                  'Free Coffees',
-                                  style: TextStyle(
-                                    color: Color(0xFF8B4513),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5DEB3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            '1 point per scan • 10 points = 1 free coffee',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xFF8B4513),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
 
@@ -440,6 +553,7 @@ class _AccountPageState extends State<AccountPage> {
               ),
               const SizedBox(height: 24),
             ],
+            ),
           ),
         ),
       ),

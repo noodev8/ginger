@@ -114,9 +114,44 @@ class HomeWidget extends StatefulWidget {
   State<HomeWidget> createState() => _HomeWidgetState();
 }
 
-class _HomeWidgetState extends State<HomeWidget> {
+class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int _logoTapCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Refresh points when the home screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshPointsIfAuthenticated();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh points when app comes to foreground
+      _refreshPointsIfAuthenticated();
+    }
+  }
+
+  void _refreshPointsIfAuthenticated() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+
+    if (user?.id != null) {
+      pointsProvider.refreshUserPoints(user!.id!);
+    }
+  }
 
   void _showQRCodeDialog() {
     showDialog(
@@ -787,8 +822,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
         body: SafeArea(
           top: true,
-          child: SingleChildScrollView(
-            child: Column(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _refreshPointsIfAuthenticated();
+            },
+            color: const Color(0xFF8B7355),
+            backgroundColor: Colors.white,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
               // Header Section
@@ -1133,6 +1175,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
 
             ],
+              ),
             ),
           ),
         ),
