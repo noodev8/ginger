@@ -1,5 +1,5 @@
-name: ginger_flutter
-description: "A new Flutter project."
+name: ginger
+description: "Ginger & Co Coffee - Loyalty App"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -105,6 +105,11 @@ flutter:
     - assets/logo.png
     - assets/icon.png
     - assets/coffee_icon2.png
+    - assets/coffee_icon_1.png
+    - assets/coffee_icon_2.png
+    - assets/coffee_icon_3.png
+    - assets/coffee_icon_4.png
+    - assets/coffee_icon_5.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

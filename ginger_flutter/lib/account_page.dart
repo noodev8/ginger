@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'models/user.dart';
 import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
+import 'services/profile_service.dart';
+import 'widgets/preset_profile_icons.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -12,7 +15,6 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
-  String? _profileImagePath;
 
   @override
   void initState() {
@@ -49,71 +51,16 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
     }
   }
 
-  void _showImagePickerOptions() {
-    showModalBottomSheet(
+  void _showEditProfileDialog() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+
+    if (user == null) return;
+
+    showDialog(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Change Profile Picture',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B7355), // Darker beige
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildImageOption(
-                    icon: Icons.camera_alt,
-                    label: 'Camera',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickImageFromCamera();
-                    },
-                  ),
-                  _buildImageOption(
-                    icon: Icons.photo_library,
-                    label: 'Gallery',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickImageFromGallery();
-                    },
-                  ),
-                  if (_profileImagePath != null)
-                    _buildImageOption(
-                      icon: Icons.delete,
-                      label: 'Remove',
-                      onTap: () {
-                        Navigator.pop(context);
-                        _removeProfileImage();
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        );
+        return EditProfileDialog(user: user);
       },
     );
   }
@@ -154,30 +101,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
     );
   }
 
-  void _pickImageFromCamera() {
-    // Simulate picking image from camera
-    // In a real app, you would use image_picker package
-    setState(() {
-      _profileImagePath = 'camera_image_${DateTime.now().millisecondsSinceEpoch}';
-    });
-    _showSnackBar('Profile picture updated from camera!');
-  }
 
-  void _pickImageFromGallery() {
-    // Simulate picking image from gallery
-    // In a real app, you would use image_picker package
-    setState(() {
-      _profileImagePath = 'gallery_image_${DateTime.now().millisecondsSinceEpoch}';
-    });
-    _showSnackBar('Profile picture updated from gallery!');
-  }
-
-  void _removeProfileImage() {
-    setState(() {
-      _profileImagePath = null;
-    });
-    _showSnackBar('Profile picture removed!');
-  }
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -235,37 +159,16 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: _showImagePickerOptions,
+                        onTap: _showEditProfileDialog,
                         child: Stack(
                           children: [
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: _profileImagePath != null
-                                  ? ClipOval(
-                                      child: Container(
-                                        width: 100,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[300],
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.photo,
-                                          color: Color(0xFF8B7355), // Darker beige
-                                          size: 40,
-                                        ),
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.person,
-                                      color: Color(0xFF8B7355), // Darker beige
-                                      size: 50,
-                                    ),
+                            Consumer<AuthProvider>(
+                              builder: (context, authProvider, child) {
+                                return UserProfileIcon(
+                                  iconId: authProvider.currentUser?.profileIconId,
+                                  size: 100,
+                                );
+                              },
                             ),
                             Positioned(
                               bottom: 0,
@@ -502,9 +405,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                     _buildAccountOption(
                       icon: Icons.edit,
                       title: 'Edit Profile',
-                      onTap: () {
-                        // TODO: Navigate to edit profile
-                      },
+                      onTap: _showEditProfileDialog,
                     ),
                     const SizedBox(height: 12),
                     _buildAccountOption(
@@ -636,6 +537,202 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
           ],
         );
       },
+    );
+  }
+}
+
+class EditProfileDialog extends StatefulWidget {
+  final User user;
+
+  const EditProfileDialog({
+    super.key,
+    required this.user,
+  });
+
+  @override
+  State<EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<EditProfileDialog> {
+  late TextEditingController _displayNameController;
+  String? _selectedIconId;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayNameController = TextEditingController(text: widget.user.displayName ?? '');
+    _selectedIconId = widget.user.profileIconId;
+  }
+
+  @override
+  void dispose() {
+    _displayNameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveProfile() async {
+    if (_isLoading) return;
+
+    final displayName = _displayNameController.text.trim();
+    if (displayName.isEmpty) {
+      _showSnackBar('Please enter a display name');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authToken = authProvider.currentUser?.authToken;
+
+      if (authToken == null) {
+        _showSnackBar('Authentication error');
+        return;
+      }
+
+      final result = await ProfileService.updateProfile(
+        authToken: authToken,
+        displayName: displayName,
+        profileIconId: _selectedIconId,
+      );
+
+      if (result != null && result['success'] == true) {
+        // Update the user in the auth provider
+        final updatedUser = widget.user.copyWith(
+          displayName: displayName,
+          profileIconId: _selectedIconId,
+        );
+        authProvider.updateCurrentUser(updatedUser);
+
+        if (mounted) {
+          _showSnackBar('Profile updated successfully!');
+          Navigator.of(context).pop();
+        }
+      } else {
+        _showSnackBar('Failed to update profile');
+      }
+    } catch (e) {
+      _showSnackBar('Error updating profile');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF5D4037),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Edit Profile',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF5D4037),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Display Name Field
+            const Text(
+              'Display Name',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF5D4037),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _displayNameController,
+              decoration: InputDecoration(
+                hintText: 'Enter your display name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF5D4037)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF5D4037), width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Profile Icon Selector
+            ProfileIconSelector(
+              selectedIconId: _selectedIconId,
+              onIconSelected: (iconId) {
+                setState(() {
+                  _selectedIconId = iconId;
+                });
+              },
+            ),
+            const SizedBox(height: 32),
+
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5D4037),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -16,6 +16,7 @@ import 'widgets/user_qr_widget.dart';
 import 'widgets/points_display_widget.dart';
 import 'widgets/user_points_summary_widget.dart';
 import 'widgets/global_coffee_stamp_overlay.dart';
+import 'widgets/preset_profile_icons.dart';
 
 
 
@@ -322,6 +323,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          const SizedBox(height: 8),
                           UserPointsSummaryWidget(userId: user?.id ?? 0),
                         ],
                       ),
@@ -1096,10 +1098,13 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                     color: Color(0xFF8B7355), // Darker beige to match buttons
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
-                                    Icons.person,
-                                    color: Colors.white,
-                                    size: 30,
+                                  child: Consumer<AuthProvider>(
+                                    builder: (context, authProvider, child) {
+                                      return UserProfileIcon(
+                                        iconId: authProvider.currentUser?.profileIconId,
+                                        size: 30,
+                                      );
+                                    },
                                   ),
                                 ),
                               ),

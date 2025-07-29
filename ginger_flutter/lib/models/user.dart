@@ -3,6 +3,7 @@ class User {
   final String email;
   final String? phone;
   final String? displayName;
+  final String? profileIconId;
   final String? passwordHash;
   final DateTime? createdAt;
   final DateTime? lastActiveAt;
@@ -17,6 +18,7 @@ class User {
     required this.email,
     this.phone,
     this.displayName,
+    this.profileIconId,
     this.passwordHash,
     this.createdAt,
     this.lastActiveAt,
@@ -33,6 +35,7 @@ class User {
       email: json['email'],
       phone: json['phone'],
       displayName: json['display_name'],
+      profileIconId: json['profile_icon_id'],
       passwordHash: json['password_hash'],
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at']) 
@@ -56,6 +59,7 @@ class User {
       'email': email,
       'phone': phone,
       'display_name': displayName,
+      'profile_icon_id': profileIconId,
       'password_hash': passwordHash,
       'created_at': createdAt?.toIso8601String(),
       'last_active_at': lastActiveAt?.toIso8601String(),
@@ -72,6 +76,7 @@ class User {
     String? email,
     String? phone,
     String? displayName,
+    String? profileIconId,
     String? passwordHash,
     DateTime? createdAt,
     DateTime? lastActiveAt,
@@ -86,6 +91,7 @@ class User {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       displayName: displayName ?? this.displayName,
+      profileIconId: profileIconId ?? this.profileIconId,
       passwordHash: passwordHash ?? this.passwordHash,
       createdAt: createdAt ?? this.createdAt,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,

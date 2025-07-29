@@ -19,6 +19,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Update the current user information
+  void updateCurrentUser(User user) {
+    _currentUser = user;
+    notifyListeners();
+  }
+
   /// Login user
   /// Returns true on success, false on failure
   /// Check lastError for specific error message

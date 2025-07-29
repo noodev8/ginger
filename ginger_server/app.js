@@ -13,6 +13,7 @@ const augmentRoutes = require('./routes/augmentRoutes');
 const authRoutes = require('./routes/auth_routes');
 const pointsRoutes = require('./routes/points_routes');
 const qrRoutes = require('./routes/qr_routes');
+const profileRoutes = require('./routes/profile_routes');
 
 // Create Express app
 const app = express();
@@ -46,6 +47,7 @@ app.use('/auth', authRoutes);
 app.use('/augment', augmentRoutes);
 app.use('/points', pointsRoutes);
 app.use('/qr', qrRoutes);
+app.use('/', profileRoutes); // Profile routes include /api/profile paths
 
 // 404 handler
 app.use('*', (req, res) => {
