@@ -106,11 +106,12 @@ class PresetProfileIconWidget extends StatelessWidget {
           ],
         ),
         child: presetIcon.assetPath != null
-            ? Padding(
-                padding: EdgeInsets.all(size * 0.2),
+            ? ClipOval(
                 child: Image.asset(
                   presetIcon.assetPath!,
-                  fit: BoxFit.contain,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
                 ),
               )
             : Icon(
