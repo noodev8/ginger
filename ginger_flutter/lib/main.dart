@@ -169,6 +169,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     }
   }
 
+  // Method to trigger reward animation from external sources
+  void triggerRewardAnimation() {
+    print('[HomeWidget] External trigger for reward animation');
+    _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
+  }
+
   void _setupPointsChangeDetection() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final user = authProvider.currentUser;
@@ -187,7 +193,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
       // Listen for points changes and trigger global animation
       _pointsChangeSubscription = _pointsChangeDetector.pointsChangeStream.listen((event) {
         print('[HomeWidget] Points change detected: ${event.pointsAdded} points added');
-        _coffeeStampController.showPointsAdded(event.pointsAdded);
+
+        // Check if this is a reward redemption
+        if (event.pointsAdded == -9) {
+          print('[HomeWidget] Reward redemption detected (-9 points), showing reward animation');
+          _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
+        } else if (event.pointsAdded == -10) {
+          print('[HomeWidget] Reward redemption detected (-10 points), showing reward animation');
+          _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
+        } else if (event.pointsAdded > 0) {
+          // Regular points addition
+          print('[HomeWidget] Positive points change (+${event.pointsAdded}), showing points animation');
+          _coffeeStampController.showPointsAdded(event.pointsAdded);
+        } else {
+          print('[HomeWidget] Other points change: ${event.pointsAdded} points (no animation)');
+        }
       });
     }
   }
@@ -703,8 +723,13 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
       final result = await qrService.redeemReward(userId);
 
       if (result != null && result['success'] == true) {
+        print('[HomeWidget] Reward redemption successful on staff side - animation should appear on customer side');
+
         // Refresh points in provider for all UI components
         await pointsProvider.refreshUserPoints(userId);
+
+        // Do NOT trigger animation here - this runs on STAFF device
+        // Animation will be triggered on CUSTOMER device via points change detection
 
         if (mounted) {
           _showRewardSuccessDialog(userName, result['new_total']?.toString() ?? '0');
@@ -861,7 +886,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
         backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
         body: SafeArea(
           top: true,
-          child: SingleChildScrollView(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Refresh points when user pulls down
+              _refreshPointsIfAuthenticated();
+            },
+            child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1210,7 +1240,8 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
             ),
           ),
         ),
-      ),
+          ), // Close RefreshIndicator
+        ),
     );
   }
 }

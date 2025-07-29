@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/global_coffee_stamp_controller.dart';
 import 'coffee_stamp_animation.dart';
+import 'reward_redemption_animation.dart';
 
 class GlobalCoffeeStampOverlay extends StatefulWidget {
   final Widget child;
@@ -51,23 +52,33 @@ class _GlobalCoffeeStampOverlayState extends State<GlobalCoffeeStampOverlay> {
 
     _overlayEntry = OverlayEntry(
       builder: (context) => Material(
-        color: Colors.black.withValues(alpha: 0.3),
+        color: _controller.animationType == AnimationType.reward
+            ? Colors.black.withValues(alpha: 0.5) // Darker background for reward
+            : Colors.black.withValues(alpha: 0.3),
         child: Center(
-          child: CoffeeStampAnimation(
-            onAnimationComplete: () {
-              print('[GlobalCoffeeStampOverlay] Animation completed, hiding overlay');
-              _controller.hideCoffeeStamp();
-            },
-            message: _controller.message,
-          ),
+          child: _controller.animationType == AnimationType.points
+              ? CoffeeStampAnimation(
+                  onAnimationComplete: () {
+                    print('[GlobalCoffeeStampOverlay] Points animation completed, hiding overlay');
+                    _controller.hideCoffeeStamp();
+                  },
+                  message: _controller.message,
+                )
+              : RewardRedemptionAnimation(
+                  onAnimationComplete: () {
+                    print('[GlobalCoffeeStampOverlay] Reward animation completed, hiding overlay');
+                    _controller.hideCoffeeStamp();
+                  },
+                  message: _controller.message,
+                ),
         ),
       ),
     );
 
-    // Insert the overlay at the top level
+    // Insert the overlay at the top level with highest priority
     try {
-      Overlay.of(context).insert(_overlayEntry!);
-      print('[GlobalCoffeeStampOverlay] Overlay inserted successfully');
+      Overlay.of(context).insert(_overlayEntry!, above: null); // Insert at the very top
+      print('[GlobalCoffeeStampOverlay] Overlay inserted successfully at highest level');
     } catch (e) {
       print('[GlobalCoffeeStampOverlay] Error inserting overlay: $e');
       _overlayEntry = null;

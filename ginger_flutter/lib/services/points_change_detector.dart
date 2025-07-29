@@ -91,12 +91,16 @@ class PointsChangeDetector {
       if (loyaltyPoints != null) {
         final currentPoints = loyaltyPoints.currentPoints;
 
-        if (_lastKnownPoints != null && currentPoints > _lastKnownPoints!) {
-          // Points increased!
+        if (_lastKnownPoints != null && currentPoints != _lastKnownPoints!) {
+          // Points changed!
           final pointsAdded = currentPoints - _lastKnownPoints!;
-          
+
           if (kDebugMode) {
-            print('[PointsChangeDetector] Points increased! +$pointsAdded (from $_lastKnownPoints to $currentPoints)');
+            if (pointsAdded > 0) {
+              print('[PointsChangeDetector] Points increased! +$pointsAdded (from $_lastKnownPoints to $currentPoints)');
+            } else {
+              print('[PointsChangeDetector] Points decreased! $pointsAdded (from $_lastKnownPoints to $currentPoints)');
+            }
           }
 
           // Emit points change event
