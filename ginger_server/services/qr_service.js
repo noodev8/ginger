@@ -189,7 +189,7 @@ class QRService {
   }
 
   /**
-   * Redeem reward (deduct 10 points and add 1 point for current scan)
+   * Redeem reward (deduct 10 points only - no additional point for scan)
    */
   async redeemReward(userId, staffUserId) {
     try {
@@ -206,7 +206,7 @@ class QRService {
         };
       }
 
-      // Deduct 10 points for the reward
+      // Deduct 10 points for the reward (no additional point for scan)
       const deductResult = await pointsService.addPointsToUser(
         userId,
         staffUserId,
@@ -214,32 +214,17 @@ class QRService {
         'Free coffee reward redeemed'
       );
 
-      if (!deductResult.success) {
-        return {
-          success: false,
-          message: 'Failed to deduct points for reward'
-        };
-      }
-
-      // Add 1 point for the current scan
-      const addResult = await pointsService.addPointsToUser(
-        userId,
-        staffUserId,
-        1,
-        'QR code scan (after reward redemption)'
-      );
-
-      if (addResult.success) {
-        console.log(`[QR_SERVICE] Successfully redeemed reward for user ${userId}. New total: ${addResult.new_total}`);
+      if (deductResult.success) {
+        console.log(`[QR_SERVICE] Successfully redeemed reward for user ${userId}. New total: ${deductResult.new_total}`);
         return {
           success: true,
           message: 'Free coffee reward redeemed successfully!',
-          new_total: addResult.new_total
+          new_total: deductResult.new_total
         };
       } else {
         return {
           success: false,
-          message: 'Failed to add scan point after reward redemption'
+          message: 'Failed to deduct points for reward'
         };
       }
     } catch (error) {

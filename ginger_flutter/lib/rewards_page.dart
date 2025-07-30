@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
+import 'widgets/user_qr_widget.dart';
 
 class RewardsPage extends StatefulWidget {
   const RewardsPage({Key? key}) : super(key: key);
@@ -53,7 +54,8 @@ class _RewardsPageState extends State<RewardsPage> {
         final int currentPoints = loyaltyPoints?.currentPoints ?? 0;
         final int pointsNeeded = 10;
         final bool hasFreeReward = currentPoints >= pointsNeeded;
-        final int pointsToNext = pointsNeeded - currentPoints;
+        final int availableRewards = currentPoints ~/ pointsNeeded; // Number of complete rewards
+        final int pointsToNext = pointsNeeded - (currentPoints % pointsNeeded);
 
         return Scaffold(
           backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
@@ -273,36 +275,136 @@ class _RewardsPageState extends State<RewardsPage> {
               ),
             ),
 
-            // Redeem Info (only show if has free reward)
+            // Rewards available section - Stamp Card Design
             if (hasFreeReward) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green, width: 2),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF8B7355), width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.local_cafe, color: Colors.green, size: 32),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Free Coffee Available!',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.local_cafe, color: Color(0xFF8B7355), size: 28),
+                          const SizedBox(width: 8),
+                          Text(
+                            availableRewards == 1 ? 'Free Coffee Ready!' : '$availableRewards Free Coffees Ready!',
+                            style: const TextStyle(
+                              color: Color(0xFF8B7355),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Stamp Card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7EDE4),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF8B7355), width: 1),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'COFFEE REWARDS',
+                              style: TextStyle(
+                                color: Color(0xFF8B7355),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Stamps Grid
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              alignment: WrapAlignment.center,
+                              children: List.generate(availableRewards, (index) =>
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF8B7355),
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.2),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.local_cafe, color: Colors.white, size: 24),
+                                      Text(
+                                        'FREE',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 4),
+
+                      const SizedBox(height: 16),
+
+                      // Action Buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _showQRCode(context, user.id!),
+                              icon: const Icon(Icons.qr_code, size: 20),
+                              label: const Text('Show QR Code'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF8B7355),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
                       const Text(
                         'Show your QR code to staff to redeem',
                         style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 14,
+                          color: Color(0xFF8B7355),
+                          fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -310,7 +412,7 @@ class _RewardsPageState extends State<RewardsPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
             ],
 
             // How it works card
@@ -395,4 +497,105 @@ class _RewardsPageState extends State<RewardsPage> {
     },
   );
 }
+
+  void _showQRCode(BuildContext context, int userId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B7355),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.qr_code,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Your QR Code',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Show this to the barista',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // QR Code
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B7355),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      final user = authProvider.currentUser;
+                      if (user?.id == null) {
+                        return const SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        );
+                      }
+
+                      return UserQRWidget(userId: user!.id!);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Close button
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B7355),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
