@@ -108,8 +108,60 @@ class _AuthWrapperState extends State<AuthWrapper> {
         }
 
         // Show main app if authenticated
-        return const HomeWidget();
+        return const MainNavigationWrapper();
       },
+    );
+  }
+}
+
+class MainNavigationWrapper extends StatefulWidget {
+  const MainNavigationWrapper({super.key});
+
+  @override
+  State<MainNavigationWrapper> createState() => _MainNavigationWrapperState();
+}
+
+class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomeWidget(),
+    const RewardsPage(),
+    const AccountPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.card_giftcard),
+            label: 'Rewards',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Account',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xFF8B7355),
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        type: BottomNavigationBarType.fixed,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }
@@ -362,34 +414,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     );
   }
 
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                authProvider.logout();
-              },
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
@@ -935,47 +959,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                          PopupMenuButton<String>(
-                            icon: const Icon(
-                              Icons.menu,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                            onSelected: (String value) {
-                              if (value == 'account') {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const AccountPage(),
-                                  ),
-                                );
-                              } else if (value == 'logout') {
-                                _showLogoutDialog();
-                              }
-                            },
-                            itemBuilder: (BuildContext context) => [
-                              const PopupMenuItem<String>(
-                                value: 'account',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.person, color: Color(0xFF8B7355)), // Darker beige
-                                    SizedBox(width: 8),
-                                    Text('My Account'),
-                                  ],
-                                ),
-                              ),
-                              const PopupMenuItem<String>(
-                                value: 'logout',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.logout, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text('Logout', style: TextStyle(color: Colors.red)),
-                                  ],
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
