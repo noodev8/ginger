@@ -110,6 +110,7 @@ flutter:
     - assets/coffee_icon_3.png
     - assets/coffee_icon_4.png
     - assets/coffee_icon_5.png
+    - assets/coffee_icon_6.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -165,8 +165,8 @@ class AuthService {
 
       // Get user from database
       const result = await database.query(
-        `SELECT id, email, display_name, phone, staff, email_verified, staff_admin, created_at, auth_token_expires 
-         FROM app_user 
+        `SELECT id, email, display_name, phone, profile_icon_id, staff, email_verified, staff_admin, created_at, auth_token_expires
+         FROM app_user
          WHERE id = $1 AND auth_token = $2`,
         [decoded.id, token]
       );

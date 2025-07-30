@@ -517,9 +517,11 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                // TODO: Implement actual logout logic
+                // Implement actual logout logic
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                await authProvider.logout();
               },
               child: const Text(
                 'Logout',

@@ -32,6 +32,12 @@ class PresetProfileIcons {
       assetPath: 'assets/coffee_icon_5.png',
       backgroundColor: Color(0xFFEFEBE9), // Very light brown
     ),
+    PresetIcon(
+      id: 'coffee_icon_6',
+      name: 'Coffee Cup 6',
+      assetPath: 'assets/coffee_icon_6.png',
+      backgroundColor: Color(0xFFE8F5E8), // Light green
+    ),
   ];
 
   static PresetIcon? getIconById(String id) {
