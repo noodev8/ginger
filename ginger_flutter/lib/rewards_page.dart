@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
+import 'providers/reward_provider.dart';
 import 'widgets/user_qr_widget.dart';
 
 class RewardsPage extends StatefulWidget {
@@ -15,22 +16,24 @@ class _RewardsPageState extends State<RewardsPage> {
   @override
   void initState() {
     super.initState();
-    // Load points when page initializes
+    // Load points and rewards when page initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+      final rewardProvider = Provider.of<RewardProvider>(context, listen: false);
       final user = authProvider.currentUser;
 
       if (user?.id != null) {
         pointsProvider.loadUserPoints(user!.id!);
       }
+      rewardProvider.loadRewards();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthProvider, PointsProvider>(
-      builder: (context, authProvider, pointsProvider, child) {
+    return Consumer3<AuthProvider, PointsProvider, RewardProvider>(
+      builder: (context, authProvider, pointsProvider, rewardProvider, child) {
         final user = authProvider.currentUser;
 
         if (user?.id == null) {
@@ -46,13 +49,14 @@ class _RewardsPageState extends State<RewardsPage> {
           );
         }
 
-        final isLoading = pointsProvider.isLoading(user!.id!);
-        final error = pointsProvider.getError(user.id!);
+        final isLoading = pointsProvider.isLoading(user!.id!) || rewardProvider.isLoading;
+        final error = pointsProvider.getError(user.id!) ?? rewardProvider.error;
         final loyaltyPoints = pointsProvider.getUserPoints(user.id!);
 
-        // Calculate points data
+        // Calculate points data using dynamic reward values
         final int currentPoints = loyaltyPoints?.currentPoints ?? 0;
-        final int pointsNeeded = 10;
+        final firstReward = rewardProvider.firstReward;
+        final int pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10 if no rewards loaded
         final bool hasFreeReward = currentPoints >= pointsNeeded;
         final int availableRewards = currentPoints ~/ pointsNeeded; // Number of complete rewards
         final int pointsToNext = pointsNeeded - (currentPoints % pointsNeeded);
@@ -73,7 +77,10 @@ class _RewardsPageState extends State<RewardsPage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: () => pointsProvider.refreshUserPoints(user.id!),
+                onPressed: () {
+                  pointsProvider.refreshUserPoints(user.id!);
+                  rewardProvider.refreshRewards();
+                },
               ),
             ],
           ),
@@ -232,7 +239,7 @@ class _RewardsPageState extends State<RewardsPage> {
                         ),
                       ] else ...[
                         Text(
-                          '$pointsToNext more points to free coffee',
+                          '$pointsToNext more points to ${firstReward?.name.toLowerCase() ?? 'free coffee'}',
                           style: const TextStyle(
                             color: Color(0xFF8B7355), // Darker beige
                             fontSize: 14,

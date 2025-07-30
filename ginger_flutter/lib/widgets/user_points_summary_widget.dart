@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/points_provider.dart';
+import '../providers/reward_provider.dart';
 
 class UserPointsSummaryWidget extends StatefulWidget {
   final int userId;
@@ -24,9 +25,9 @@ class _UserPointsSummaryWidgetState extends State<UserPointsSummaryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PointsProvider>(
-      builder: (context, pointsProvider, child) {
-        final isLoading = pointsProvider.isLoading(widget.userId);
+    return Consumer2<PointsProvider, RewardProvider>(
+      builder: (context, pointsProvider, rewardProvider, child) {
+        final isLoading = pointsProvider.isLoading(widget.userId) || rewardProvider.isLoading;
         final loyaltyPoints = pointsProvider.getUserPoints(widget.userId);
 
         if (isLoading) {
@@ -41,7 +42,9 @@ class _UserPointsSummaryWidgetState extends State<UserPointsSummaryWidget> {
         }
 
         final currentPoints = loyaltyPoints?.currentPoints ?? 0;
-        final freeCoffees = currentPoints ~/ 10; // Integer division - how many free coffees earned
+        final firstReward = rewardProvider.firstReward;
+        final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10 if no rewards loaded
+        final freeCoffees = currentPoints ~/ pointsNeeded; // Integer division - how many free coffees earned
 
         return Text(
           '$currentPoints Points • $freeCoffees Free Coffees Earned',

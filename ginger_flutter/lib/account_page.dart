@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'models/user.dart';
 import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
+import 'providers/reward_provider.dart';
 import 'services/profile_service.dart';
 import 'widgets/preset_profile_icons.dart';
 
@@ -235,15 +236,17 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
               // Points Summary Card
               Padding(
                 padding: const EdgeInsets.all(24),
-                child: Consumer2<AuthProvider, PointsProvider>(
-                  builder: (context, authProvider, pointsProvider, child) {
+                child: Consumer3<AuthProvider, PointsProvider, RewardProvider>(
+                  builder: (context, authProvider, pointsProvider, rewardProvider, child) {
                     final user = authProvider.currentUser;
                     final isLoading = user?.id != null ? pointsProvider.isLoading(user!.id!) : false;
                     final error = user?.id != null ? pointsProvider.getError(user!.id!) : null;
                     final loyaltyPoints = user?.id != null ? pointsProvider.getUserPoints(user!.id!) : null;
 
                     final currentPoints = loyaltyPoints?.currentPoints ?? 0;
-                    final freeCoffees = currentPoints ~/ 10; // Integer division - how many free coffees earned
+                    final firstReward = rewardProvider.firstReward;
+                    final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10 if no rewards loaded
+                    final freeCoffees = currentPoints ~/ pointsNeeded; // Integer division - how many free coffees earned
 
                     return Container(
                       width: double.infinity,

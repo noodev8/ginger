@@ -7,6 +7,7 @@ import 'rewards_page.dart';
 import 'login_page.dart';
 import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
+import 'providers/reward_provider.dart';
 import 'services/qr_service.dart';
 import 'services/points_service.dart';
 import 'services/points_change_detector.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => PointsProvider()),
+        ChangeNotifierProvider(create: (context) => RewardProvider()),
       ],
       child: MaterialApp(
         title: 'Ginger & Co Coffee',
@@ -215,11 +217,13 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   void _refreshPointsIfAuthenticated() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+    final rewardProvider = Provider.of<RewardProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
     if (user?.id != null) {
       pointsProvider.refreshUserPoints(user!.id!);
     }
+    rewardProvider.refreshRewards();
   }
 
   // Method to trigger reward animation from external sources
@@ -230,6 +234,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
   void _setupPointsChangeDetection() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final rewardProvider = Provider.of<RewardProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
     if (user?.id != null) {
@@ -247,12 +252,16 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
       _pointsChangeSubscription = _pointsChangeDetector.pointsChangeStream.listen((event) {
         print('[HomeWidget] Points change detected: ${event.pointsAdded} points added');
 
-        // Check if this is a reward redemption
-        if (event.pointsAdded == -9) {
-          print('[HomeWidget] Reward redemption detected (-9 points), showing reward animation');
+        // Check if this is a reward redemption (negative points that match reward values)
+        final firstReward = rewardProvider.firstReward;
+        final pointsNeeded = firstReward?.pointsRequired ?? 10;
+
+        if (event.pointsAdded == -pointsNeeded) {
+          print('[HomeWidget] Reward redemption detected (-$pointsNeeded points), showing reward animation');
           _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
-        } else if (event.pointsAdded == -10) {
-          print('[HomeWidget] Reward redemption detected (-10 points), showing reward animation');
+        } else if (event.pointsAdded == -(pointsNeeded - 1)) {
+          // Handle legacy case where 1 point was added after deducting reward points
+          print('[HomeWidget] Reward redemption detected (-${pointsNeeded - 1} points), showing reward animation');
           _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
         } else if (event.pointsAdded > 0) {
           // Regular points addition
@@ -506,64 +515,72 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Reward Available!',
-            style: TextStyle(
-              color: Color(0xFF8B7355),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.local_cafe,
-                color: Color(0xFF8B7355),
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '$userName has $currentPoints points',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Would you like to redeem 10 points for a free coffee?',
+        return Consumer<RewardProvider>(
+          builder: (context, rewardProvider, child) {
+            final firstReward = rewardProvider.firstReward;
+            final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10
+            final rewardName = firstReward?.name ?? 'free coffee';
+
+            return AlertDialog(
+              title: const Text(
+                'Reward Available!',
                 style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
+                  color: Color(0xFF8B7355),
+                  fontWeight: FontWeight.bold,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Add 1 point as normal (no reward redemption)
-                _addNormalPoint(userId, userName);
-              },
-              child: const Text(
-                'No, Add 1 Point',
-                style: TextStyle(color: Colors.grey),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.local_cafe,
+                    color: Color(0xFF8B7355),
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '$userName has $currentPoints points',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Would you like to redeem $pointsNeeded points for $rewardName?',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Redeem reward
-                _redeemReward(userId, userName);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8B7355),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Yes, Redeem Free Coffee'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Add 1 point as normal (no reward redemption)
+                    _addNormalPoint(userId, userName);
+                  },
+                  child: const Text(
+                    'No, Add 1 Point',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Redeem reward
+                    _redeemReward(userId, userName);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B7355),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text('Yes, Redeem $rewardName'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

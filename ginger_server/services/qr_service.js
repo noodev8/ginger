@@ -138,21 +138,24 @@ class QRService {
 
       // Get current points to check for reward eligibility
       const pointsService = require('./points_service');
+      const rewardService = require('./reward_service');
       const currentPoints = await pointsService.getUserPoints(validation.user_id);
       const pointsTotal = currentPoints ? currentPoints.current_points : 0;
 
       console.log(`[QR_SERVICE] User ${validation.user_id} has ${pointsTotal} points`);
 
-      // Check if user has enough points for a reward (10 points = 1 free coffee)
-      if (pointsTotal >= 10) {
-        console.log(`[QR_SERVICE] User eligible for reward with ${pointsTotal} points`);
+      // Check if user has enough points for any available reward
+      const availableReward = await rewardService.getAvailableReward(pointsTotal);
+      if (availableReward) {
+        console.log(`[QR_SERVICE] User eligible for reward: ${availableReward.name} (${availableReward.points_required} points)`);
         return {
           success: true,
           reward_eligible: true,
           user_id: validation.user_id,
           user_name: validation.user_name,
           current_points: pointsTotal,
-          message: `${validation.user_name} has ${pointsTotal} points and is eligible for a free coffee!`
+          reward: availableReward,
+          message: `${validation.user_name} has ${pointsTotal} points and is eligible for ${availableReward.name}!`
         };
       } else {
         // Add 1 point as normal
@@ -189,36 +192,47 @@ class QRService {
   }
 
   /**
-   * Redeem reward (deduct 10 points only - no additional point for scan)
+   * Redeem reward (deduct points based on reward from database)
    */
   async redeemReward(userId, staffUserId) {
     try {
       console.log(`[QR_SERVICE] Processing reward redemption for user: ${userId} by staff: ${staffUserId}`);
 
       const pointsService = require('./points_service');
+      const rewardService = require('./reward_service');
 
       // Get current points to verify eligibility
       const currentPoints = await pointsService.getUserPoints(userId);
-      if (!currentPoints || currentPoints.current_points < 10) {
+      if (!currentPoints) {
         return {
           success: false,
-          message: 'User does not have enough points for a reward'
+          message: 'User points record not found'
         };
       }
 
-      // Deduct 10 points for the reward (no additional point for scan)
+      // Find the best available reward for the user's points
+      const availableReward = await rewardService.getAvailableReward(currentPoints.current_points);
+      if (!availableReward) {
+        return {
+          success: false,
+          message: 'User does not have enough points for any reward'
+        };
+      }
+
+      // Deduct points for the reward (no additional point for scan)
       const deductResult = await pointsService.addPointsToUser(
         userId,
         staffUserId,
-        -10,
-        'Free coffee reward redeemed'
+        -availableReward.points_required,
+        `${availableReward.name} reward redeemed`
       );
 
       if (deductResult.success) {
-        console.log(`[QR_SERVICE] Successfully redeemed reward for user ${userId}. New total: ${deductResult.new_total}`);
+        console.log(`[QR_SERVICE] Successfully redeemed ${availableReward.name} for user ${userId}. New total: ${deductResult.new_total}`);
         return {
           success: true,
-          message: 'Free coffee reward redeemed successfully!',
+          message: `${availableReward.name} reward redeemed successfully!`,
+          reward: availableReward,
           new_total: deductResult.new_total
         };
       } else {

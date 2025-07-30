@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/points_provider.dart';
+import '../providers/reward_provider.dart';
 
 class PointsDisplayWidget extends StatefulWidget {
   final int userId;
@@ -24,10 +25,10 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PointsProvider>(
-      builder: (context, pointsProvider, child) {
-        final isLoading = pointsProvider.isLoading(widget.userId);
-        final error = pointsProvider.getError(widget.userId);
+    return Consumer2<PointsProvider, RewardProvider>(
+      builder: (context, pointsProvider, rewardProvider, child) {
+        final isLoading = pointsProvider.isLoading(widget.userId) || rewardProvider.isLoading;
+        final error = pointsProvider.getError(widget.userId) ?? rewardProvider.error;
         final loyaltyPoints = pointsProvider.getUserPoints(widget.userId);
 
         if (isLoading) {
@@ -35,10 +36,10 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
         }
 
         if (error != null || loyaltyPoints == null) {
-          return _buildErrorState(pointsProvider);
+          return _buildErrorState(pointsProvider, rewardProvider);
         }
 
-        return _buildPointsDisplay(loyaltyPoints);
+        return _buildPointsDisplay(loyaltyPoints, rewardProvider);
       },
     );
   }
@@ -80,7 +81,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
     );
   }
 
-  Widget _buildErrorState(PointsProvider pointsProvider) {
+  Widget _buildErrorState(PointsProvider pointsProvider, RewardProvider rewardProvider) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -111,7 +112,10 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => pointsProvider.refreshUserPoints(widget.userId),
+              onPressed: () {
+                pointsProvider.refreshUserPoints(widget.userId);
+                rewardProvider.refreshRewards();
+              },
               child: const Text(
                 'Retry',
                 style: TextStyle(color: Color(0xFF8B7355)),
@@ -123,10 +127,12 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
     );
   }
 
-  Widget _buildPointsDisplay(loyaltyPoints) {
+  Widget _buildPointsDisplay(loyaltyPoints, RewardProvider rewardProvider) {
     final currentPoints = loyaltyPoints.currentPoints;
-    final pointsToNextReward = 10 - (currentPoints % 10);
-    final progress = (currentPoints % 10) / 10.0;
+    final firstReward = rewardProvider.firstReward;
+    final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10 if no rewards loaded
+    final pointsToNextReward = pointsNeeded - (currentPoints % pointsNeeded);
+    final progress = (currentPoints % pointsNeeded) / pointsNeeded.toDouble();
 
     return Container(
       width: double.infinity,
@@ -211,7 +217,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
               ),
             ),
             Text(
-              pointsToNextReward == 10 
+              pointsToNextReward == pointsNeeded
                   ? 'Congratulations! You earned a free drink!'
                   : '$pointsToNextReward to next free drink',
               style: const TextStyle(
