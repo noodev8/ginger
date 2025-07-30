@@ -126,25 +126,6 @@ class _RewardsPageState extends State<RewardsPage> {
               : SingleChildScrollView(
         child: Column(
           children: [
-            // Header with gradient - matching home page pattern
-            Container(
-              width: double.infinity,
-              height: 100,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFA0956B), // Warm beige at top
-                    Color(0xFFC4B896), // Light beige
-                    Color(0x80C4B896), // Semi-transparent light beige
-                    Color(0x00F7EDE4), // Fully transparent to match background
-                  ],
-                  stops: [0, 0.4, 0.8, 1],
-                  begin: AlignmentDirectional(0, -1),
-                  end: AlignmentDirectional(0, 1),
-                ),
-              ),
-            ),
-
             // Current Status Card
             Padding(
               padding: const EdgeInsets.all(24),
@@ -162,23 +143,23 @@ class _RewardsPageState extends State<RewardsPage> {
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
                       // Progress Circle
                       SizedBox(
-                        width: 120,
-                        height: 120,
+                        width: 80,
+                        height: 80,
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
                             // Background circle
                             SizedBox(
-                              width: 120,
-                              height: 120,
+                              width: 80,
+                              height: 80,
                               child: CircularProgressIndicator(
                                 value: 1.0,
-                                strokeWidth: 8,
+                                strokeWidth: 6,
                                 backgroundColor: Colors.transparent,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   Colors.grey[300]!,
@@ -187,11 +168,11 @@ class _RewardsPageState extends State<RewardsPage> {
                             ),
                             // Progress circle
                             SizedBox(
-                              width: 120,
-                              height: 120,
+                              width: 80,
+                              height: 80,
                               child: CircularProgressIndicator(
                                 value: currentPoints / pointsNeeded,
-                                strokeWidth: 8,
+                                strokeWidth: 6,
                                 backgroundColor: Colors.transparent,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   hasFreeReward ? Colors.green : const Color(0xFF8B7355), // Darker beige
@@ -200,8 +181,8 @@ class _RewardsPageState extends State<RewardsPage> {
                             ),
                             // Coffee cup icon in center
                             Container(
-                              width: 60,
-                              height: 60,
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
                                 color: hasFreeReward ? Colors.green : const Color(0xFF8B7355), // Darker beige
                                 shape: BoxShape.circle,
@@ -210,14 +191,14 @@ class _RewardsPageState extends State<RewardsPage> {
                                 ? const Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 30,
+                                    size: 20,
                                   )
                                 : Padding(
-                                    padding: const EdgeInsets.all(12.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Image.asset(
                                       'assets/coffee_icon2.png',
-                                      width: 36,
-                                      height: 36,
+                                      width: 24,
+                                      height: 24,
                                       fit: BoxFit.contain,
                                       color: Colors.white,
                                       colorBlendMode: BlendMode.srcIn,
@@ -227,44 +208,34 @@ class _RewardsPageState extends State<RewardsPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       
                       // Status Text
-                      if (hasFreeReward) ...[
-                        const Text(
-                          '🎉 FREE COFFEE READY! 🎉',
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
+                      Text(
+                        '$currentPoints / $pointsNeeded Points',
+                        style: const TextStyle(
+                          color: Color(0xFF2F1B14),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'You have earned a free coffee!\nShow this to staff to redeem.',
-                          style: TextStyle(
-                            color: Color(0xFF2F1B14),
-                            fontSize: 16,
+                      ),
+                      const SizedBox(height: 4),
+                      if (hasFreeReward) ...[
+                        Text(
+                          'You have ${availableRewards == 1 ? '1 free coffee' : '$availableRewards free coffees'} ready!',
+                          style: const TextStyle(
+                            color: Color(0xFF8B7355),
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
                           textAlign: TextAlign.center,
                         ),
                       ] else ...[
                         Text(
-                          '$currentPoints / $pointsNeeded Points',
-                          style: const TextStyle(
-                            color: Color(0xFF2F1B14),
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
                           '$pointsToNext more points to free coffee',
                           style: const TextStyle(
                             color: Color(0xFF8B7355), // Darker beige
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -382,10 +353,8 @@ class _RewardsPageState extends State<RewardsPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: ElevatedButton(
                               onPressed: () => _showQRCode(context, user.id!),
-                              icon: const Icon(Icons.qr_code, size: 20),
-                              label: const Text('Show QR Code'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF8B7355),
                                 foregroundColor: Colors.white,
@@ -394,6 +363,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
+                              child: const Text('Show QR Code'),
                             ),
                           ),
                         ],
