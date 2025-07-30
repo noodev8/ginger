@@ -49,7 +49,8 @@ class _RegisterPageState extends State<RegisterPage> {
     if (mounted) {
       if (success) {
         _showSnackBar('Account created successfully! Welcome to Ginger & Co.', isError: false);
-        // Navigation will be handled automatically by AuthWrapper
+        // Navigate back to root so AuthWrapper can handle the authenticated state
+        Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         // Use specific error message from the provider
         final errorMessage = authProvider.lastError ?? 'Registration failed. Please try again.';
