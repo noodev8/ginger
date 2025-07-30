@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
 import 'models/user.dart';
 import 'providers/auth_provider.dart';
 import 'providers/points_provider.dart';
@@ -114,6 +115,13 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      _showSnackBar('Could not open $url');
+    }
   }
 
   @override
@@ -409,26 +417,18 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 12),
                     _buildAccountOption(
-                      icon: Icons.notifications,
-                      title: 'Notifications',
-                      onTap: () {
-                        // TODO: Navigate to notifications settings
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildAccountOption(
                       icon: Icons.help_outline,
                       title: 'Help & Support',
                       onTap: () {
-                        // TODO: Navigate to help
+                        _launchURL('https://www.noodev8.com/contact/');
                       },
                     ),
                     const SizedBox(height: 12),
                     _buildAccountOption(
-                      icon: Icons.info_outline,
-                      title: 'About',
+                      icon: Icons.privacy_tip_outlined,
+                      title: 'Privacy Policy',
                       onTap: () {
-                        // TODO: Navigate to about
+                        _launchURL('https://www.noodev8.com/privacy-policy/');
                       },
                     ),
                     const SizedBox(height: 24),
