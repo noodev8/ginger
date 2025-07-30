@@ -409,14 +409,6 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 12),
                     _buildAccountOption(
-                      icon: Icons.card_giftcard,
-                      title: 'Rewards History',
-                      onTap: () {
-                        // TODO: Navigate to rewards history
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildAccountOption(
                       icon: Icons.notifications,
                       title: 'Notifications',
                       onTap: () {
@@ -643,11 +635,16 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          maxWidth: MediaQuery.of(context).size.width * 0.9,
+        ),
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             const Text(
               'Edit Profile',
               style: TextStyle(
@@ -731,6 +728,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

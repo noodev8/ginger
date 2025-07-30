@@ -1169,31 +1169,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
                         // Standard customer buttons (for everyone)
                         const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const RewardsPage(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.card_giftcard, color: Color(0xFF8B7355)),
-                          label: const Text('View Rewards'),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B7355), // Match button color
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 56),
-                            side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
                           onPressed: () {
