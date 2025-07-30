@@ -19,10 +19,10 @@ class AuthController {
       const { email, password, display_name, phone } = req.body;
 
       // Validation
-      if (!email || !password) {
+      if (!email || !password || !display_name) {
         return res.status(400).json({
           return_code: 'MISSING_REQUIRED_FIELDS',
-          message: 'Email and password are required'
+          message: 'Email, password, and full name are required'
         });
       }
 
@@ -44,7 +44,7 @@ class AuthController {
       const user = await authService.register({
         email: email.toLowerCase().trim(),
         password,
-        display_name: display_name?.trim(),
+        display_name: display_name.trim(),
         phone: phone?.trim()
       });
 

@@ -71,7 +71,7 @@ class AuthService {
   Future<User> register({
     required String email,
     required String password,
-    String? displayName,
+    required String displayName,
     String? phone,
   }) async {
     try {

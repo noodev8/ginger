@@ -40,9 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final success = await authProvider.register(
       email: _emailController.text.trim(),
       password: _passwordController.text,
-      displayName: _displayNameController.text.trim().isEmpty
-          ? null
-          : _displayNameController.text.trim(),
+      displayName: _displayNameController.text.trim(),
       phone: _phoneController.text.trim().isEmpty
           ? null
           : _phoneController.text.trim(),
@@ -63,12 +61,33 @@ class _RegisterPageState extends State<RegisterPage> {
   void _showSnackBar(String message, {bool isError = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : const Color(0xFF8B7355),
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isError ? Colors.red.shade600 : const Color(0xFF8B7355),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
+        duration: Duration(seconds: isError ? 4 : 2), // Show errors longer
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -170,7 +189,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           TextFormField(
                             controller: _displayNameController,
                             decoration: InputDecoration(
-                              labelText: 'Full Name (Optional)',
+                              labelText: 'Full Name *',
                               hintText: 'Enter your full name',
                               prefixIcon: const Icon(Icons.person_outline),
                               border: OutlineInputBorder(
@@ -183,7 +202,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                   width: 2,
                                 ),
                               ),
+                              errorMaxLines: 2,
                             ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your full name';
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 16),
 
@@ -205,6 +231,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   width: 2,
                                 ),
                               ),
+                              errorMaxLines: 2,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -236,6 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   width: 2,
                                 ),
                               ),
+                              errorMaxLines: 2,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -268,13 +296,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                   width: 2,
                                 ),
                               ),
+                              errorMaxLines: 2,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a password';
                               }
                               if (!_authService.isValidPassword(value)) {
-                                return 'Password must be at least 8 characters with letters and numbers';
+                                return 'Min 8 chars with letters & numbers';
                               }
                               return null;
                             },
@@ -309,6 +338,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   width: 2,
                                 ),
                               ),
+                              errorMaxLines: 2,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
