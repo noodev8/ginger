@@ -60,6 +60,7 @@ class _RewardsPageState extends State<RewardsPage> {
         final bool hasFreeReward = currentPoints >= pointsNeeded;
         final int availableRewards = currentPoints ~/ pointsNeeded; // Number of complete rewards
         final int pointsToNext = pointsNeeded - (currentPoints % pointsNeeded);
+        final allRewards = rewardProvider.rewards ?? [];
 
         return Scaffold(
           backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
@@ -387,6 +388,151 @@ class _RewardsPageState extends State<RewardsPage> {
                       ),
                     ],
                   ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            // All Rewards Section
+            if (allRewards.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'All Rewards',
+                      style: TextStyle(
+                        color: Color(0xFF2F1B14),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...allRewards.map((reward) {
+                      final canAfford = currentPoints >= reward.pointsRequired;
+                      final availableCount = currentPoints ~/ reward.pointsRequired;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: canAfford ? Colors.green : const Color(0xFFE0E0E0),
+                            width: canAfford ? 2 : 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // Reward Icon
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: canAfford ? Colors.green : const Color(0xFF8B7355),
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: canAfford
+                                  ? const Icon(Icons.check, color: Colors.white, size: 24)
+                                  : const Icon(Icons.local_cafe, color: Colors.white, size: 24),
+                            ),
+                            const SizedBox(width: 16),
+
+                            // Reward Details
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    reward.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2F1B14),
+                                    ),
+                                  ),
+                                  if (reward.description != null && reward.description!.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      reward.description!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF666666),
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF8B7355),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          '${reward.pointsRequired} points',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      if (canAfford) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            availableCount == 1 ? '1 available' : '$availableCount available',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Status Indicator
+                            if (canAfford)
+                              const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 24,
+                              )
+                            else
+                              Text(
+                                '${reward.pointsRequired - currentPoints}\nmore needed',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF666666),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),

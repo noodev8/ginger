@@ -74,7 +74,43 @@ async function setupTestData() {
     qrCodes.rows.forEach(row => {
       console.log(`   User ${row.user_id} (${row.email}): "${row.qr_code_data}"`);
     });
-    
+
+    // Create sample rewards
+    const existingRewards = await database.query('SELECT id, name, points_required FROM rewards ORDER BY points_required');
+    console.log(`\n🏆 Found ${existingRewards.rows.length} existing rewards`);
+
+    if (existingRewards.rows.length === 0) {
+      console.log('Creating sample rewards...');
+
+      const sampleRewards = [
+        { name: 'Free Coffee', description: 'Get a free regular coffee of your choice', points: 10 },
+        { name: 'Free Pastry', description: 'Choose any pastry from our selection', points: 15 },
+        { name: 'Large Coffee Upgrade', description: 'Upgrade any coffee to large size for free', points: 5 },
+        { name: 'Free Specialty Drink', description: 'Get any specialty drink like latte, cappuccino, or mocha', points: 20 },
+        { name: 'Coffee & Pastry Combo', description: 'Get a free coffee and pastry together', points: 25 },
+        { name: 'Free Lunch Item', description: 'Choose any sandwich or salad from our lunch menu', points: 30 },
+      ];
+
+      for (const reward of sampleRewards) {
+        await database.query(
+          'INSERT INTO rewards (name, description, points_required) VALUES ($1, $2, $3)',
+          [reward.name, reward.description, reward.points]
+        );
+        console.log(`   ✅ Created reward: ${reward.name} (${reward.points} points)`);
+      }
+    }
+
+    // Display all rewards
+    const allRewards = await database.query('SELECT id, name, description, points_required, is_active FROM rewards ORDER BY points_required');
+    console.log('\n📋 All rewards:');
+    allRewards.rows.forEach(reward => {
+      const status = reward.is_active ? '✅' : '❌';
+      console.log(`   ${status} ${reward.name}: ${reward.points_required} points`);
+      if (reward.description) {
+        console.log(`      ${reward.description}`);
+      }
+    });
+
     console.log('\n🎉 Test data setup complete!');
     console.log('\nLogin credentials:');
     console.log('  Staff: staff@test.com / password123');
