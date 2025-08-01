@@ -148,6 +148,73 @@ class ProfileService {
   async updateProfileIcon(userId, profileIconId) {
     return await this.updateUserProfile(userId, { profile_icon_id: profileIconId });
   }
+
+  /**
+   * Delete user account and all associated data
+   * @param {number} userId - The user ID to delete
+   * @returns {boolean} True if deletion was successful
+   */
+  async deleteUserAccount(userId) {
+    const client = await database.getClient();
+
+    try {
+      console.log('[ProfileService] Starting account deletion for user:', userId);
+
+      await client.query('BEGIN');
+
+      // Check if reward_redemptions table exists and delete if it does
+      const tableCheck = await client.query(
+        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'reward_redemptions'"
+      );
+
+      if (tableCheck.rows.length > 0) {
+        const redemptionsResult = await client.query(
+          'DELETE FROM reward_redemptions WHERE user_id = $1',
+          [userId]
+        );
+        console.log(`[ProfileService] Deleted ${redemptionsResult.rowCount} reward redemptions`);
+      } else {
+        console.log('[ProfileService] reward_redemptions table does not exist, skipping');
+      }
+
+      // Delete point transactions (where user earned/spent points)
+      const transactionsResult = await client.query(
+        'DELETE FROM point_transactions WHERE user_id = $1',
+        [userId]
+      );
+      console.log(`[ProfileService] Deleted ${transactionsResult.rowCount} point transactions`);
+
+      // Delete loyalty points record
+      const loyaltyResult = await client.query(
+        'DELETE FROM loyalty_points WHERE user_id = $1',
+        [userId]
+      );
+      console.log(`[ProfileService] Deleted ${loyaltyResult.rowCount} loyalty points records`);
+
+      // Finally, delete the user account
+      const userResult = await client.query(
+        'DELETE FROM app_user WHERE id = $1',
+        [userId]
+      );
+      console.log(`[ProfileService] Deleted ${userResult.rowCount} user accounts`);
+
+      if (userResult.rowCount === 0) {
+        throw new Error('User not found');
+      }
+
+      await client.query('COMMIT');
+      console.log('[ProfileService] Account deletion completed successfully');
+
+      return true;
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('[ProfileService] Account deletion failed:', error.message);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 module.exports = new ProfileService();

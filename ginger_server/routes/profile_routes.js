@@ -163,4 +163,39 @@ router.put('/api/profile/icon', authMiddleware.authenticateToken, async (req, re
   }
 });
 
+// Delete user account and all associated data
+router.delete('/api/profile', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    console.log('[ProfileRoutes] Deleting account for user:', req.user.id);
+
+    const success = await profileService.deleteUserAccount(req.user.id);
+
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Account deleted successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete account'
+      });
+    }
+  } catch (error) {
+    console.error('[ProfileRoutes] Error deleting account:', error);
+
+    if (error.message === 'User not found') {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 module.exports = router;

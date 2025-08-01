@@ -241,4 +241,45 @@ class AuthService {
     return password.length >= 8 &&
            RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(password);
   }
+
+  /// Delete user account and all associated data
+  Future<bool> deleteAccount() async {
+    try {
+      final token = await _storage.read(key: _tokenKey);
+
+      if (token == null) {
+        if (kDebugMode) {
+          print('No auth token found for account deletion');
+        }
+        return false;
+      }
+
+      // Call delete account endpoint
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.baseUrl}/api/profile'),
+        headers: ApiConfig.getAuthHeaders(token),
+      ).timeout(ApiConfig.requestTimeout);
+
+      if (response.statusCode == 200) {
+        // Account deleted successfully, clear local storage
+        await _storage.delete(key: _tokenKey);
+        await _storage.delete(key: _userKey);
+
+        if (kDebugMode) {
+          print('Account deleted successfully');
+        }
+        return true;
+      } else {
+        if (kDebugMode) {
+          print('Account deletion failed: ${response.statusCode} - ${response.body}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Account deletion error: $e');
+      }
+      return false;
+    }
+  }
 }

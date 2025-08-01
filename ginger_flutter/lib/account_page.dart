@@ -436,6 +436,15 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 24),
                     _buildAccountOption(
+                      icon: Icons.delete_forever,
+                      title: 'Delete Account',
+                      isDestructive: true,
+                      onTap: () {
+                        _showDeleteAccountDialog(context);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildAccountOption(
                       icon: Icons.logout,
                       title: 'Logout',
                       isDestructive: true,
@@ -505,6 +514,112 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Delete Account',
+            style: TextStyle(color: Colors.red),
+          ),
+          content: const Text(
+            'Are you sure you want to delete your account?\n\n'
+            'This action cannot be undone and will permanently remove:\n'
+            '• Your profile information\n'
+            '• All loyalty points\n'
+            '• Transaction history\n'
+            '• Reward redemption history',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteAccount();
+              },
+              child: const Text(
+                'Delete Account',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('Deleting account...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final success = await authProvider.deleteAccount();
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (success) {
+        // Account deleted successfully - user will be automatically logged out
+        // and redirected to login screen by the auth state change
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.lastError ?? 'Failed to delete account'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showLogoutDialog(BuildContext context) {

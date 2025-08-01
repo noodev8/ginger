@@ -129,4 +129,34 @@ class AuthProvider extends ChangeNotifier {
   Future<String?> getAuthToken() async {
     return await _authService.getStoredToken();
   }
+
+  /// Delete user account
+  /// Returns true on success, false on failure
+  /// Check lastError for specific error message
+  Future<bool> deleteAccount() async {
+    _isLoading = true;
+    _lastError = null;
+    notifyListeners();
+
+    try {
+      final success = await _authService.deleteAccount();
+      if (success) {
+        _currentUser = null;
+        notifyListeners();
+        return true;
+      } else {
+        _lastError = 'Failed to delete account. Please try again.';
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Delete account error in provider: $e');
+      }
+      _lastError = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
