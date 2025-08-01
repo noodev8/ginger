@@ -101,7 +101,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ analytics, detailed = false }) =>
             <MetricCard
               title="Active Customers"
               value={analytics.customers_with_points.toLocaleString()}
-              subtitle={`${calculateEngagementRate()}% engagement rate`}
+              subtitle={`Customers with points (${calculateEngagementRate()}% engagement)`}
               icon={<Star />}
               color="success"
             />
@@ -171,8 +171,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ analytics, detailed = false }) =>
                     <Typography variant="h6">Engagement Rate</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {calculateEngagementRate()}% of customers have earned loyalty points,
-                    showing good app engagement.
+                    {calculateEngagementRate()}% of customers have earned loyalty points.
+                    Active customers are defined as those with current points &gt; 0.
                   </Typography>
                 </Paper>
 

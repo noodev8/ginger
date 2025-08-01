@@ -179,11 +179,13 @@ const Dashboard: React.FC = () => {
 
       <Container maxWidth="xl" sx={{ mt: 3, mb: 3 }}>
         {activeTab === 'overview' && (
-          <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
-            <Box sx={{ flex: { lg: 2 } }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Customer Analytics - Full Width */}
+            <Box sx={{ width: '100%' }}>
               <Analytics analytics={dashboardData.analytics} />
             </Box>
-            <Box sx={{ flex: { lg: 1 } }}>
+            {/* Recent Transactions - Full Width Below */}
+            <Box sx={{ width: '100%' }}>
               <RecentTransactions transactions={dashboardData.recent_transactions} />
             </Box>
           </Box>
