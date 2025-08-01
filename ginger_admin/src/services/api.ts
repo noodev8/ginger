@@ -41,6 +41,16 @@ export interface Transaction {
   staff_name?: string;
 }
 
+export interface Reward {
+  id: number;
+  name: string;
+  description?: string;
+  points_required: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DashboardData {
   staff: Staff[];
   analytics: Analytics;
@@ -131,6 +141,52 @@ export const adminApi = {
       return data.transactions;
     }
     throw new Error(data.message || 'Failed to fetch transactions');
+  },
+
+  // Reward management
+  getRewards: async (): Promise<Reward[]> => {
+    const response = await api.get('/admin/rewards');
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.rewards;
+    }
+    throw new Error(data.message || 'Failed to fetch rewards');
+  },
+
+  createReward: async (name: string, description: string, pointsRequired: number): Promise<Reward> => {
+    const response = await api.post('/admin/rewards', {
+      name,
+      description,
+      points_required: pointsRequired,
+    });
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.reward;
+    }
+    throw new Error(data.message || 'Failed to create reward');
+  },
+
+  updateReward: async (id: number, name: string, description: string, pointsRequired: number, isActive: boolean): Promise<Reward> => {
+    const response = await api.put(`/admin/rewards/${id}`, {
+      name,
+      description,
+      points_required: pointsRequired,
+      is_active: isActive,
+    });
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.reward;
+    }
+    throw new Error(data.message || 'Failed to update reward');
+  },
+
+  deleteReward: async (id: number): Promise<Reward> => {
+    const response = await api.delete(`/admin/rewards/${id}`);
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.reward;
+    }
+    throw new Error(data.message || 'Failed to delete reward');
   },
 };
 

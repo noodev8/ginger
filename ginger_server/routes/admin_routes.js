@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, requireStaffAdmin } = require('../middleware/auth_middleware');
 const adminService = require('../services/admin_service');
+const rewardService = require('../services/reward_service');
 
 /*
 =======================================================================================================================================
@@ -117,6 +118,159 @@ router.get('/dashboard', authenticateToken, requireStaffAdmin, async (req, res) 
     });
   } catch (error) {
     console.error('[AdminRoutes] Error getting dashboard data:', error);
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /admin/rewards
+=======================================================================================================================================
+Method: GET
+Purpose: Get all rewards (including inactive ones) for admin management
+=======================================================================================================================================
+*/
+router.get('/rewards', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    console.log('[AdminRoutes] Getting all rewards for management');
+
+    const rewards = await rewardService.getAllRewards();
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Rewards retrieved successfully',
+      rewards: rewards
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error getting rewards:', error);
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /admin/rewards
+=======================================================================================================================================
+Method: POST
+Purpose: Create a new reward
+=======================================================================================================================================
+*/
+router.post('/rewards', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    const { name, description, points_required } = req.body;
+
+    if (!name || !points_required || points_required < 1) {
+      return res.status(400).json({
+        return_code: 'INVALID_DATA',
+        message: 'Name and valid points_required are required'
+      });
+    }
+
+    console.log(`[AdminRoutes] Creating new reward: ${name} (${points_required} points)`);
+
+    const reward = await rewardService.createReward(name, description, parseInt(points_required));
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Reward created successfully',
+      reward: reward
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error creating reward:', error);
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /admin/rewards/:id
+=======================================================================================================================================
+Method: PUT
+Purpose: Update an existing reward
+=======================================================================================================================================
+*/
+router.put('/rewards/:id', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, points_required, is_active } = req.body;
+
+    if (!name || !points_required || points_required < 1) {
+      return res.status(400).json({
+        return_code: 'INVALID_DATA',
+        message: 'Name and valid points_required are required'
+      });
+    }
+
+    console.log(`[AdminRoutes] Updating reward ID: ${id}`);
+
+    const reward = await rewardService.updateReward(
+      parseInt(id),
+      name,
+      description,
+      parseInt(points_required),
+      is_active !== false
+    );
+
+    if (!reward) {
+      return res.status(404).json({
+        return_code: 'NOT_FOUND',
+        message: 'Reward not found'
+      });
+    }
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Reward updated successfully',
+      reward: reward
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error updating reward:', error);
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /admin/rewards/:id
+=======================================================================================================================================
+Method: DELETE
+Purpose: Delete (deactivate) a reward
+=======================================================================================================================================
+*/
+router.delete('/rewards/:id', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(`[AdminRoutes] Deleting reward ID: ${id}`);
+
+    const reward = await rewardService.deleteReward(parseInt(id));
+
+    if (!reward) {
+      return res.status(404).json({
+        return_code: 'NOT_FOUND',
+        message: 'Reward not found'
+      });
+    }
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Reward deleted successfully',
+      reward: reward
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error deleting reward:', error);
     res.status(500).json({
       return_code: 'ERROR',
       message: 'Internal server error'

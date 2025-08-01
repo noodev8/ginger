@@ -16,6 +16,7 @@ import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   Analytics as AnalyticsIcon,
+  EmojiEvents as RewardsIcon,
   Refresh as RefreshIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
@@ -23,12 +24,13 @@ import { adminApi, DashboardData, clearAuthToken } from '../services/api';
 import StaffList from './StaffList';
 import Analytics from './Analytics';
 import RecentTransactions from './RecentTransactions';
+import ManageRewards from './ManageRewards';
 
 const Dashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'staff' | 'analytics'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'staff' | 'analytics' | 'rewards'>('overview');
 
   useEffect(() => {
     loadDashboardData();
@@ -120,9 +122,10 @@ const Dashboard: React.FC = () => {
     <DashboardIcon />,
     <PeopleIcon />,
     <AnalyticsIcon />,
+    <RewardsIcon />,
   ];
 
-  const tabLabels = ['Overview', 'Staff Management', 'Customer Analytics'];
+  const tabLabels = ['Overview', 'Staff Management', 'Customer Analytics', 'Manage Rewards'];
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -147,9 +150,9 @@ const Dashboard: React.FC = () => {
           </Button>
         </Toolbar>
         <Tabs
-          value={activeTab === 'overview' ? 0 : activeTab === 'staff' ? 1 : 2}
+          value={activeTab === 'overview' ? 0 : activeTab === 'staff' ? 1 : activeTab === 'analytics' ? 2 : 3}
           onChange={(_, newValue) => {
-            const tabs = ['overview', 'staff', 'analytics'] as const;
+            const tabs = ['overview', 'staff', 'analytics', 'rewards'] as const;
             setActiveTab(tabs[newValue]);
           }}
           sx={{
@@ -197,6 +200,10 @@ const Dashboard: React.FC = () => {
 
         {activeTab === 'analytics' && (
           <Analytics analytics={dashboardData.analytics} detailed={true} />
+        )}
+
+        {activeTab === 'rewards' && (
+          <ManageRewards />
         )}
       </Container>
     </Box>
