@@ -183,9 +183,25 @@ router.post('/rewards', authenticateToken, requireStaffAdmin, async (req, res) =
     });
   } catch (error) {
     console.error('[AdminRoutes] Error creating reward:', error);
+
+    // Return specific error messages for validation errors
+    if (error.message.includes('required') || error.message.includes('must be')) {
+      return res.status(400).json({
+        return_code: 'VALIDATION_ERROR',
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('already exists')) {
+      return res.status(409).json({
+        return_code: 'DUPLICATE_ERROR',
+        message: error.message
+      });
+    }
+
     res.status(500).json({
-      return_code: 'ERROR',
-      message: 'Internal server error'
+      return_code: 'SERVER_ERROR',
+      message: 'Failed to create reward. Please try again.'
     });
   }
 });
@@ -234,9 +250,25 @@ router.put('/rewards/:id', authenticateToken, requireStaffAdmin, async (req, res
     });
   } catch (error) {
     console.error('[AdminRoutes] Error updating reward:', error);
+
+    // Return specific error messages for validation errors
+    if (error.message.includes('required') || error.message.includes('must be') || error.message.includes('Invalid')) {
+      return res.status(400).json({
+        return_code: 'VALIDATION_ERROR',
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('already exists')) {
+      return res.status(409).json({
+        return_code: 'DUPLICATE_ERROR',
+        message: error.message
+      });
+    }
+
     res.status(500).json({
-      return_code: 'ERROR',
-      message: 'Internal server error'
+      return_code: 'SERVER_ERROR',
+      message: 'Failed to update reward. Please try again.'
     });
   }
 });

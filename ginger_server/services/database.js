@@ -47,20 +47,39 @@ class Database {
     }
   }
 
-  async query(text, params) {
+  async query(text, params, retries = 1) {
     const start = Date.now();
-    try {
-      const res = await this.pool.query(text, params);
-      const duration = Date.now() - start;
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📊 Query executed:', { text, duration: `${duration}ms`, rows: res.rowCount });
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await this.pool.query(text, params);
+        const duration = Date.now() - start;
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log('📊 Query executed:', { text, duration: `${duration}ms`, rows: res.rowCount });
+        }
+
+        return res;
+      } catch (err) {
+        const isLastAttempt = attempt === retries;
+
+        // Retry on connection errors, but not on data/constraint errors
+        const shouldRetry = !isLastAttempt && (
+          err.code === 'ECONNRESET' ||
+          err.code === 'ENOTFOUND' ||
+          err.code === 'ECONNREFUSED' ||
+          err.message.includes('connection')
+        );
+
+        if (shouldRetry) {
+          console.log(`⚠️ Database query failed (attempt ${attempt + 1}/${retries + 1}), retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1))); // Exponential backoff
+          continue;
+        }
+
+        console.error('❌ Database query error:', err.message);
+        throw err;
       }
-      
-      return res;
-    } catch (err) {
-      console.error('❌ Database query error:', err.message);
-      throw err;
     }
   }
 

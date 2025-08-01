@@ -126,7 +126,24 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
       handleCloseDialog();
       await loadRewards();
     } catch (err: any) {
-      setError(err.message || 'Failed to save reward');
+      console.error('Error saving reward:', err);
+
+      // Handle different types of errors
+      let errorMessage = 'Failed to save reward';
+
+      if (err.response?.status === 400) {
+        errorMessage = err.response.data?.message || 'Invalid data provided';
+      } else if (err.response?.status === 409) {
+        errorMessage = 'A reward with this name already exists';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Session expired. Please refresh the page and try again.';
+      } else if (err.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again in a moment.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -142,7 +159,23 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
       await adminApi.deleteReward(reward.id);
       await loadRewards();
     } catch (err: any) {
-      setError(err.message || 'Failed to delete reward');
+      console.error('Error deleting reward:', err);
+
+      let errorMessage = 'Failed to delete reward';
+
+      if (err.response?.status === 404) {
+        errorMessage = 'Reward not found. It may have already been deleted.';
+        // Refresh the list to show current state
+        await loadRewards();
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Session expired. Please refresh the page and try again.';
+      } else if (err.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again in a moment.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     }
   };
 

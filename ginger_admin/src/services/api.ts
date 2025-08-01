@@ -194,9 +194,21 @@ export const adminApi = {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect to login for actual authentication failures, not server errors
     if (error.response?.status === 401) {
-      clearAuthToken();
-      window.location.href = '/login';
+      const errorData = error.response.data;
+
+      // Check if it's a genuine auth error (not a server error masquerading as 401)
+      if (errorData?.return_code === 'ERROR' &&
+          (errorData?.message?.includes('token') ||
+           errorData?.message?.includes('Access token required') ||
+           errorData?.message?.includes('Invalid token'))) {
+        console.log('Authentication failed, redirecting to login');
+        clearAuthToken();
+        window.location.href = '/login';
+      } else {
+        console.log('Server error returned 401, but not clearing auth token');
+      }
     }
     return Promise.reject(error);
   }

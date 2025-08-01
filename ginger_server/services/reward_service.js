@@ -99,15 +99,32 @@ class RewardService {
     try {
       console.log(`[REWARD_SERVICE] Creating new reward: ${name} (${pointsRequired} points)`);
 
+      // Validate inputs
+      if (!name || typeof name !== 'string' || name.trim().length === 0) {
+        throw new Error('Reward name is required');
+      }
+      if (!pointsRequired || pointsRequired < 1) {
+        throw new Error('Points required must be at least 1');
+      }
+
       const result = await database.query(
         'INSERT INTO rewards (name, description, points_required) VALUES ($1, $2, $3) RETURNING *',
-        [name, description, pointsRequired]
+        [name.trim(), description?.trim() || null, parseInt(pointsRequired)]
       );
 
       console.log(`[REWARD_SERVICE] Created reward with ID: ${result.rows[0].id}`);
       return result.rows[0];
     } catch (error) {
       console.error('[REWARD_SERVICE] Create reward error:', error.message);
+
+      // Handle specific database errors
+      if (error.code === '23505') { // Unique constraint violation
+        throw new Error('A reward with this name already exists');
+      }
+      if (error.code === '23502') { // Not null violation
+        throw new Error('Required field is missing');
+      }
+
       throw error;
     }
   }
@@ -119,9 +136,20 @@ class RewardService {
     try {
       console.log(`[REWARD_SERVICE] Updating reward ID: ${rewardId}`);
 
+      // Validate inputs
+      if (!rewardId || isNaN(parseInt(rewardId))) {
+        throw new Error('Invalid reward ID');
+      }
+      if (!name || typeof name !== 'string' || name.trim().length === 0) {
+        throw new Error('Reward name is required');
+      }
+      if (!pointsRequired || pointsRequired < 1) {
+        throw new Error('Points required must be at least 1');
+      }
+
       const result = await database.query(
         'UPDATE rewards SET name = $1, description = $2, points_required = $3, is_active = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
-        [name, description, pointsRequired, isActive, rewardId]
+        [name.trim(), description?.trim() || null, parseInt(pointsRequired), Boolean(isActive), parseInt(rewardId)]
       );
 
       if (result.rows.length > 0) {
@@ -133,6 +161,15 @@ class RewardService {
       }
     } catch (error) {
       console.error('[REWARD_SERVICE] Update reward error:', error.message);
+
+      // Handle specific database errors
+      if (error.code === '23505') { // Unique constraint violation
+        throw new Error('A reward with this name already exists');
+      }
+      if (error.code === '23502') { // Not null violation
+        throw new Error('Required field is missing');
+      }
+
       throw error;
     }
   }
