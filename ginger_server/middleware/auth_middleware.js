@@ -57,13 +57,31 @@ const requireStaff = (req, res, next) => {
 };
 
 /**
+ * Middleware to require staff admin privileges
+ */
+const requireStaffAdmin = (req, res, next) => {
+  console.log(`[AUTH] Checking staff admin privileges for user ${req.user.id}`);
+
+  if (!req.user.staff || !req.user.staff_admin) {
+    console.log(`[AUTH] Access denied - user ${req.user.id} is not staff admin`);
+    return res.status(403).json({
+      return_code: 'ERROR',
+      message: 'Staff admin privileges required'
+    });
+  }
+
+  console.log(`[AUTH] Staff admin access granted for user ${req.user.id}`);
+  next();
+};
+
+/**
  * Middleware to require ownership or staff privileges
  */
 const requireOwnershipOrStaff = (paramName) => {
   return (req, res, next) => {
     const resourceUserId = parseInt(req.params[paramName]);
     console.log(`[AUTH] Checking ownership/staff for resource user ${resourceUserId}, auth user ${req.user.id}`);
-    
+
     if (req.user.id !== resourceUserId && !req.user.staff) {
       console.log(`[AUTH] Access denied - user ${req.user.id} cannot access resource for user ${resourceUserId}`);
       return res.status(403).json({
@@ -80,6 +98,7 @@ const requireOwnershipOrStaff = (paramName) => {
 module.exports = {
   authenticateToken,
   requireStaff,
+  requireStaffAdmin,
   requireOwnershipOrStaff
 };
 

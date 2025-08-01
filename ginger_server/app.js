@@ -15,6 +15,7 @@ const pointsRoutes = require('./routes/points_routes');
 const qrRoutes = require('./routes/qr_routes');
 const profileRoutes = require('./routes/profile_routes');
 const rewardRoutes = require('./routes/reward_routes');
+const adminRoutes = require('./routes/admin_routes');
 
 // Create Express app
 const app = express();
@@ -49,6 +50,7 @@ app.use('/augment', augmentRoutes);
 app.use('/points', pointsRoutes);
 app.use('/qr', qrRoutes);
 app.use('/rewards', rewardRoutes);
+app.use('/admin', adminRoutes);
 app.use('/', profileRoutes); // Profile routes include /api/profile paths
 
 // 404 handler
@@ -70,7 +72,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || 'localhost';
 
 app.listen(PORT, HOST, () => {

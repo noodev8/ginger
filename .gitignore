@@ -1,11 +1,5 @@
 # =========================================
 # General (Windows/macOS/IDEs)
-.DS_Store
-Thumbs.db
-*.log
-*.swp
-*.swo
-*.tmp
 *.lock
 
 # IntelliJ / Android Studio
@@ -16,13 +10,15 @@ Thumbs.db
 .vscode/
 
 # =========================================
-# Node.js & Next.js (splitdine_server + frontend)
-node_modules/
+# Node.js & React/Next.js (all projects)
+**/node_modules/
 .env
 .env.local
 .env.production
 .env.development
+.env.test
 dist/
+build/
 .cache/
 .next/
 out/
@@ -30,10 +26,26 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+
+# React/TypeScript specific
+**/.eslintcache
+**/coverage/
+**/*.tsbuildinfo
+**/tsconfig.tsbuildinfo
+
+# Package manager lock files (keep package-lock.json but ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # =========================================
 # Flutter (splitdine_flutter)
-build/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -62,10 +74,46 @@ android/key.jks
 
 # Python environment
 venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Claude Code settings
 .claude/
 
 # Any Private Keys
 splitdine-ocr-6921886ed122.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
 
