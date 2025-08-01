@@ -917,6 +917,71 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     );
   }
 
+  void _showFindUsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(
+                Icons.location_on,
+                color: Color(0xFF8B7355),
+                size: 28,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Find us',
+                style: TextStyle(
+                  color: Color(0xFF8B7355),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Visit us at:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF8B7355),
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Ginger & Co. Coffee\n30-31 Princess Street\nShrewsbury\nSY1 1LW',
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.4,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Close',
+                style: TextStyle(
+                  color: Color(0xFF8B7355),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -1193,6 +1258,25 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                           },
                           icon: const Icon(Icons.restaurant_menu, color: Color(0xFF8B7355)),
                           label: const Text('Menu'),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: const Color(0xFF8B7355), // Darker beige
+                            minimumSize: const Size(double.infinity, 56),
+                            side: const BorderSide(color: Color(0xFF8B7355), width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: _showFindUsDialog,
+                          icon: const Icon(Icons.location_on, color: Color(0xFF8B7355)),
+                          label: const Text('Find us'),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             foregroundColor: const Color(0xFF8B7355), // Darker beige
