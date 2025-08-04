@@ -1,9 +1,7 @@
 class ApiConfig {
 
 
- //static const String baseUrl = 'http://10.0.2.2:3001'; // Android emulator
-//static const String baseUrl = 'http://localhost:3001'; // iOS simulator / web
-//static const String baseUrl = 'http://127.0.0.1:3001'; // Alternative localhost
+
  static const String baseUrl = 'http://192.168.0.15:3001'; // welshpool - updated to port 3001
  //static const String baseUrl = 'http://192.168.1.187:3001'; // work - updated to port 3001
 //static const String baseUrl = 'http://192.168.1.173:3001'; // shrewsbury - updated to port 3001

@@ -943,18 +943,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Header with Logo Text
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF7EDE4), // Match background
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/logotext.png',
-                      height: 60,
-                      fit: BoxFit.contain,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Image.asset(
+                    'assets/logotext.png',
+                    height: 120,
+                    fit: BoxFit.contain,
                   ),
                 ),
               
@@ -1147,7 +1141,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                         ],
 
                         // Standard customer buttons (for everyone)
-                        const SizedBox(height: 12),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
                           onPressed: () {

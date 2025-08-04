@@ -159,6 +159,27 @@ class _RewardsPageState extends State<RewardsPage> {
               : SingleChildScrollView(
         child: Column(
           children: [
+            // Points Display
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 4),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B7355),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'You have $currentPoints points',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
 
 
             // Rewards available section - Stamp Card Design
@@ -286,20 +307,12 @@ class _RewardsPageState extends State<RewardsPage> {
                         ],
                       ),
 
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Show your QR code to staff to redeem',
-                        style: TextStyle(
-                          color: Color(0xFF8B7355),
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
             ],
 
             // Rewards Section
@@ -608,81 +621,7 @@ class _RewardsPageState extends State<RewardsPage> {
               const SizedBox(height: 24),
             ],
 
-            // How it works card
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF8B7355),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'How it works:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Icon(Icons.qr_code, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Show your QR code to staff when you buy a coffee',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.add_circle, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Earn 1 point for every coffee purchase',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.local_cafe, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Get a free coffee when you reach 10 points',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+
           ],
                     ),
                   ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'models/user.dart';
 import 'providers/auth_provider.dart';
@@ -246,7 +245,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                     final currentPoints = loyaltyPoints?.currentPoints ?? 0;
                     final firstReward = rewardProvider.firstReward;
                     final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10 if no rewards loaded
-                    final freeCoffees = currentPoints ~/ pointsNeeded; // Integer division - how many free coffees earned
+                    final freeRewards = currentPoints ~/ pointsNeeded; // Integer division - how many free rewards earned
 
                     return Container(
                       width: double.infinity,
@@ -363,15 +362,15 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                   Column(
                                     children: [
                                       Text(
-                                        '$freeCoffees',
+                                        '$freeRewards',
                                         style: const TextStyle(
                                           color: Color(0xFF2F1B14),
                                           fontSize: 32,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const Text(
-                                        'Free Coffees',
+                                      Text(
+                                        'Free Rewards',
                                         style: TextStyle(
                                           color: Color(0xFF8B4513),
                                           fontSize: 14,
@@ -382,24 +381,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                   ),
                                 ],
                               ),
-                            const SizedBox(height: 16),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF5DEB3),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Text(
-                                '1 point per scan • 10 points = 1 free coffee',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Color(0xFF8B4513),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
+
                           ],
                         ),
                       ),
