@@ -177,7 +177,7 @@ class HomeWidget extends StatefulWidget {
 
 class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  int _logoTapCount = 0;
+
   final PointsChangeDetector _pointsChangeDetector = PointsChangeDetector();
   final GlobalCoffeeStampController _coffeeStampController = GlobalCoffeeStampController();
   StreamSubscription<PointsChangeEvent>? _pointsChangeSubscription;
@@ -614,102 +614,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   }
 
   void _onLogoTap() {
-    setState(() {
-      _logoTapCount++;
-    });
-
-    if (_logoTapCount >= 5) {
-      _logoTapCount = 0; // Reset counter
-      _showStaffPinDialog();
-    }
-  }
-
-  void _showStaffPinDialog() {
-    String enteredPin = '';
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text(
-                'Staff Login',
-                style: TextStyle(
-                  color: Color(0xFFA0956B),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Enter Staff PIN:'),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(3, (index) {
-                      return Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index < enteredPin.length
-                              ? const Color(0xFF8B7355) // Darker beige
-                              : Colors.grey[300],
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 20),
-                  // Simple text field for PIN entry
-                  SizedBox(
-                    width: 150,
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 3,
-                      obscureText: true,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 8,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: '• • •',
-                        counterText: '',
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF8B7355), width: 2), // Darker beige
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (value.length == 3) {
-                          _checkPin(value);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-
-
-  void _checkPin(String pin) {
-    // PIN functionality removed - staff access now controlled by database
-    Navigator.of(context).pop(); // Close pin dialog
+    // PIN login functionality removed - staff access now controlled by database
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Staff access is now controlled by your account permissions'),
@@ -717,6 +622,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
       ),
     );
   }
+
+
+
+
+
+
 
   void _addNormalPoint(int userId, String userName) async {
     try {
