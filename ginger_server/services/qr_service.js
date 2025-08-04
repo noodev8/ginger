@@ -144,19 +144,38 @@ class QRService {
 
       console.log(`[QR_SERVICE] User ${validation.user_id} has ${pointsTotal} points`);
 
-      // Check if user has enough points for any available reward
-      const availableReward = await rewardService.getAvailableReward(pointsTotal);
-      if (availableReward) {
-        console.log(`[QR_SERVICE] User eligible for reward: ${availableReward.name} (${availableReward.points_required} points)`);
-        return {
-          success: true,
-          reward_eligible: true,
-          user_id: validation.user_id,
-          user_name: validation.user_name,
-          current_points: pointsTotal,
-          reward: availableReward,
-          message: `${validation.user_name} has ${pointsTotal} points and is eligible for ${availableReward.name}!`
-        };
+      // Check if user has enough points for any available rewards
+      const availableRewards = await rewardService.getAvailableRewards(pointsTotal);
+      if (availableRewards && availableRewards.length > 0) {
+        console.log(`[QR_SERVICE] User eligible for ${availableRewards.length} reward(s)`);
+
+        if (availableRewards.length === 1) {
+          // Single reward - use existing logic
+          const reward = availableRewards[0];
+          console.log(`[QR_SERVICE] Single reward available: ${reward.name} (${reward.points_required} points)`);
+          return {
+            success: true,
+            reward_eligible: true,
+            user_id: validation.user_id,
+            user_name: validation.user_name,
+            current_points: pointsTotal,
+            reward: reward,
+            message: `${validation.user_name} has ${pointsTotal} points and is eligible for ${reward.name}!`
+          };
+        } else {
+          // Multiple rewards - let staff choose
+          console.log(`[QR_SERVICE] Multiple rewards available: ${availableRewards.map(r => `${r.name} (${r.points_required}pts)`).join(', ')}`);
+          return {
+            success: true,
+            reward_eligible: true,
+            multiple_rewards: true,
+            user_id: validation.user_id,
+            user_name: validation.user_name,
+            current_points: pointsTotal,
+            available_rewards: availableRewards,
+            message: `${validation.user_name} has ${pointsTotal} points and can choose from ${availableRewards.length} rewards!`
+          };
+        }
       } else {
         // Add 1 point as normal
         const result = await pointsService.addPointsToUser(
@@ -243,6 +262,73 @@ class QRService {
       }
     } catch (error) {
       console.error('[QR_SERVICE] Redeem reward error:', error.message);
+      return {
+        success: false,
+        message: 'Internal server error'
+      };
+    }
+  }
+
+  /**
+   * Redeem a specific reward by ID
+   */
+  async redeemSpecificReward(userId, staffUserId, rewardId) {
+    try {
+      console.log(`[QR_SERVICE] Processing specific reward redemption for user: ${userId}, reward: ${rewardId} by staff: ${staffUserId}`);
+
+      const pointsService = require('./points_service');
+      const rewardService = require('./reward_service');
+
+      // Get current points to verify eligibility
+      const currentPoints = await pointsService.getUserPoints(userId);
+      if (!currentPoints) {
+        return {
+          success: false,
+          message: 'User points record not found'
+        };
+      }
+
+      // Get the specific reward
+      const reward = await rewardService.getRewardById(rewardId);
+      if (!reward) {
+        return {
+          success: false,
+          message: 'Reward not found or inactive'
+        };
+      }
+
+      // Check if user has enough points for this specific reward
+      if (currentPoints.current_points < reward.points_required) {
+        return {
+          success: false,
+          message: `User does not have enough points for ${reward.name}. Required: ${reward.points_required}, Available: ${currentPoints.current_points}`
+        };
+      }
+
+      // Deduct points for the specific reward
+      const deductResult = await pointsService.addPointsToUser(
+        userId,
+        staffUserId,
+        -reward.points_required,
+        `${reward.name} reward redeemed`
+      );
+
+      if (deductResult.success) {
+        console.log(`[QR_SERVICE] Successfully redeemed ${reward.name} for user ${userId}. New total: ${deductResult.new_total}`);
+        return {
+          success: true,
+          message: `${reward.name} reward redeemed successfully!`,
+          reward: reward,
+          new_total: deductResult.new_total
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to deduct points for reward'
+        };
+      }
+    } catch (error) {
+      console.error('[QR_SERVICE] Redeem specific reward error:', error.message);
       return {
         success: false,
         message: 'Internal server error'

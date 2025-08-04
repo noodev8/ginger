@@ -217,9 +217,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
               ),
             ),
             Text(
-              pointsToNextReward == pointsNeeded
-                  ? 'Congratulations! You earned a free drink!'
-                  : '$pointsToNextReward to next free drink',
+              '$pointsToNextReward to next free drink',
               style: const TextStyle(
                 color: Color(0xFF8B7355),
                 fontSize: 12,

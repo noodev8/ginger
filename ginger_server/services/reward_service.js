@@ -28,7 +28,7 @@ class RewardService {
   async getAvailableReward(userPoints) {
     try {
       console.log(`[REWARD_SERVICE] Finding available reward for ${userPoints} points`);
-      
+
       const result = await database.query(
         'SELECT * FROM rewards WHERE is_active = true AND points_required <= $1 ORDER BY points_required ASC LIMIT 1',
         [userPoints]
@@ -43,6 +43,26 @@ class RewardService {
       }
     } catch (error) {
       console.error('[REWARD_SERVICE] Get available reward error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all available rewards that the user can afford
+   */
+  async getAvailableRewards(userPoints) {
+    try {
+      console.log(`[REWARD_SERVICE] Finding all available rewards for ${userPoints} points`);
+
+      const result = await database.query(
+        'SELECT * FROM rewards WHERE is_active = true AND points_required <= $1 ORDER BY points_required ASC',
+        [userPoints]
+      );
+
+      console.log(`[REWARD_SERVICE] Found ${result.rows.length} available rewards for ${userPoints} points`);
+      return result.rows;
+    } catch (error) {
+      console.error('[REWARD_SERVICE] Get available rewards error:', error.message);
       throw error;
     }
   }

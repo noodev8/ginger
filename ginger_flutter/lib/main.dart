@@ -464,11 +464,23 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     if (result['success'] == true) {
       // Check if customer is eligible for a reward
       if (result['reward_eligible'] == true) {
-        _showRewardDialog(
-          result['user_name'] ?? 'Customer',
-          result['current_points'] ?? 0,
-          result['user_id'],
-        );
+        if (result['multiple_rewards'] == true) {
+          // Multiple rewards available - show selection dialog
+          _showMultipleRewardsDialog(
+            result['user_name'] ?? 'Customer',
+            result['current_points'] ?? 0,
+            result['user_id'],
+            result['available_rewards'] ?? [],
+          );
+        } else {
+          // Single reward available
+          _showRewardDialog(
+            result['user_name'] ?? 'Customer',
+            result['current_points'] ?? 0,
+            result['user_id'],
+            result['reward'], // Pass the specific reward information
+          );
+        }
       } else {
         _showSuccessDialog(
           result['user_name'] ?? 'Customer',
@@ -540,15 +552,15 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     );
   }
 
-  void _showRewardDialog(String userName, int currentPoints, int userId) {
+  void _showRewardDialog(String userName, int currentPoints, int userId, Map<String, dynamic>? rewardData) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Consumer<RewardProvider>(
           builder: (context, rewardProvider, child) {
-            final firstReward = rewardProvider.firstReward;
-            final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10
-            final rewardName = firstReward?.name ?? 'free coffee';
+            // Use the specific reward from server if available, otherwise fallback to provider
+            final pointsNeeded = rewardData?['points_required'] ?? rewardProvider.firstReward?.pointsRequired ?? 10;
+            final rewardName = rewardData?['name'] ?? rewardProvider.firstReward?.name ?? 'free coffee';
 
             return AlertDialog(
               title: const Text(
@@ -562,7 +574,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    _getRewardIcon(firstReward?.name),
+                    _getRewardIcon(rewardName),
                     color: const Color(0xFF8B7355),
                     size: 48,
                   ),
@@ -642,13 +654,133 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     );
   }
 
+  void _showMultipleRewardsDialog(String userName, int currentPoints, int userId, List<dynamic> availableRewards) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Choose Reward',
+            style: TextStyle(
+              color: Color(0xFF8B7355),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '$userName has $currentPoints points',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Choose which reward to redeem:',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              // List of available rewards
+              ...availableRewards.map((reward) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _redeemSpecificReward(userId, userName, reward);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8B7355),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _getRewardIcon(reward['name']),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                reward['name'] ?? 'Reward',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '${reward['points_required']} points',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Add 1 point normally instead of redeeming
+                _addNormalPoint(userId, userName);
+              },
+              child: const Text(
+                'Add Point Instead',
+                style: TextStyle(color: Color(0xFF8B7355)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+  void _redeemSpecificReward(int userId, String userName, Map<String, dynamic> reward) async {
+    try {
+      final qrService = QRService();
+      final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
 
+      final result = await qrService.redeemSpecificReward(userId, reward['id']);
 
+      if (result != null && result['success'] == true) {
+        print('[HomeWidget] Specific reward redemption successful on staff side - animation should appear on customer side');
 
+        // Refresh points in provider for all UI components
+        await pointsProvider.refreshUserPoints(userId);
 
-
-
+        if (mounted) {
+          _showRewardSuccessDialog(userName, result['new_total']?.toString() ?? '0');
+        }
+      } else {
+        if (mounted) {
+          _showErrorDialog(result?['message'] ?? 'Failed to redeem reward');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Error redeeming reward: $e');
+      }
+    }
+  }
 
   void _addNormalPoint(int userId, String userName) async {
     try {

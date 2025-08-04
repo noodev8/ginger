@@ -82,6 +82,9 @@ class QRService {
           'reward_eligible': responseData['reward_eligible'] ?? false,
           'user_id': responseData['user_id'],
           'current_points': responseData['current_points'],
+          'reward': responseData['reward'], // Single reward information
+          'multiple_rewards': responseData['multiple_rewards'] ?? false,
+          'available_rewards': responseData['available_rewards'], // Multiple rewards list
         };
       } else {
         return {
@@ -128,6 +131,45 @@ class QRService {
       }
     } catch (e) {
       print('Redeem reward error: $e');
+      return {
+        'success': false,
+        'message': 'Network error: $e',
+      };
+    }
+  }
+
+  /// Redeem a specific reward by ID
+  Future<Map<String, dynamic>?> redeemSpecificReward(int userId, int rewardId) async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/qr/redeem-specific-reward'),
+        headers: ApiConfig.getAuthHeaders(token),
+        body: jsonEncode({
+          'user_id': userId,
+          'reward_id': rewardId,
+        }),
+      ).timeout(ApiConfig.requestTimeout);
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['return_code'] == 'SUCCESS') {
+        return {
+          'success': true,
+          'message': responseData['message'],
+          'reward': responseData['reward'],
+          'new_total': responseData['new_total'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Redemption failed',
+        };
+      }
+    } catch (e) {
+      print('Redeem specific reward error: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
