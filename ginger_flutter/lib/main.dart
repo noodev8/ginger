@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => RewardProvider()),
       ],
       child: MaterialApp(
-        title: 'Ginger & Co Coffee',
+        title: 'DailyStamp',
         debugShowCheckedModeBanner: false, // Remove debug banner
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFA0956B)),
@@ -81,7 +81,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image(
-                    image: AssetImage('assets/logo.png'),
+                    image: AssetImage('assets/icon.png'),
                     width: 100,
                     height: 100,
                   ),
@@ -642,15 +642,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     );
   }
 
-  void _onLogoTap() {
-    // PIN login functionality removed - staff access now controlled by database
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Staff access is now controlled by your account permissions'),
-        backgroundColor: Color(0xFF8B7355), // Darker beige
-      ),
-    );
-  }
+
 
 
 
@@ -950,63 +942,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-              // Header Section
-              Container(
-                width: double.infinity,
-                height: 220, // Made smaller
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFA0956B), // Warm beige at top
-                      Color(0xFFC4B896), // Light beige
-                      Color(0x80C4B896), // Semi-transparent light beige
-                      Color(0x00F7EDE4), // Fully transparent to match new background
-                    ],
-                    stops: [0, 0.4, 0.8, 1],
-                    begin: AlignmentDirectional(0, -1), // Top
-                    end: AlignmentDirectional(0, 1),   // Bottom
+                // Header with Logo Text
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF7EDE4), // Match background
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/logotext.png',
+                      height: 60,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Top menu row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(width: 40), // Spacer for balance
-                          const Expanded(
-                            child: Text(
-                              'Ginger & Co Coffee',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Logo (moved closer to text above)
-                      Flexible(
-                        child: GestureDetector(
-                          onTap: _onLogoTap,
-                          child: Image.asset(
-                            'assets/logo.png',
-                            width: 90,
-                            height: 90,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               
               // Welcome Card - Show customer card for everyone, with staff indicator if applicable
               Consumer<AuthProvider>(
