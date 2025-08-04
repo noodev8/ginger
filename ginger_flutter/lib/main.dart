@@ -182,6 +182,30 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   final GlobalCoffeeStampController _coffeeStampController = GlobalCoffeeStampController();
   StreamSubscription<PointsChangeEvent>? _pointsChangeSubscription;
 
+  // Helper function to get icon based on reward name
+  IconData _getRewardIcon(String? rewardName) {
+    if (rewardName == null) return Icons.local_cafe;
+
+    final name = rewardName.toLowerCase();
+
+    if (name.contains('coffee')) {
+      return Icons.local_cafe;
+    } else if (name.contains('pastry') || name.contains('cake') || name.contains('muffin') || name.contains('croissant')) {
+      return Icons.cake;
+    } else if (name.contains('lunch') || name.contains('sandwich') || name.contains('salad')) {
+      return Icons.lunch_dining;
+    } else if (name.contains('specialty') || name.contains('latte') || name.contains('cappuccino') || name.contains('mocha')) {
+      return Icons.coffee;
+    } else if (name.contains('upgrade') || name.contains('large')) {
+      return Icons.keyboard_arrow_up;
+    } else if (name.contains('combo')) {
+      return Icons.restaurant;
+    } else {
+      // Default to coffee cup for unknown rewards
+      return Icons.local_cafe;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -229,7 +253,10 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   // Method to trigger reward animation from external sources
   void triggerRewardAnimation() {
     print('[HomeWidget] External trigger for reward animation');
-    _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
+    final rewardProvider = Provider.of<RewardProvider>(context, listen: false);
+    final firstReward = rewardProvider.firstReward;
+    final rewardName = firstReward?.name ?? 'Coffee';
+    _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your $rewardName!');
   }
 
   void _setupPointsChangeDetection() {
@@ -258,11 +285,13 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
         if (event.pointsAdded == -pointsNeeded) {
           print('[HomeWidget] Reward redemption detected (-$pointsNeeded points), showing reward animation');
-          _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
+          final rewardName = firstReward?.name ?? 'Coffee';
+          _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your $rewardName!');
         } else if (event.pointsAdded == -(pointsNeeded - 1)) {
           // Handle legacy case where 1 point was added after deducting reward points
           print('[HomeWidget] Reward redemption detected (-${pointsNeeded - 1} points), showing reward animation');
-          _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your Coffee!');
+          final rewardName = firstReward?.name ?? 'Coffee';
+          _coffeeStampController.showRewardRedeemed(message: 'Enjoy Your $rewardName!');
         } else if (event.pointsAdded > 0) {
           // Regular points addition
           print('[HomeWidget] Positive points change (+${event.pointsAdded}), showing points animation');
@@ -532,9 +561,9 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.local_cafe,
-                    color: Color(0xFF8B7355),
+                  Icon(
+                    _getRewardIcon(firstReward?.name),
+                    color: const Color(0xFF8B7355),
                     size: 48,
                   ),
                   const SizedBox(height: 16),
@@ -704,14 +733,19 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Free Coffee Redeemed!',
-            style: TextStyle(
-              color: Color(0xFF8B7355),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        return Consumer<RewardProvider>(
+          builder: (context, rewardProvider, child) {
+            final firstReward = rewardProvider.firstReward;
+            final rewardName = firstReward?.name ?? 'Coffee';
+
+            return AlertDialog(
+              title: Text(
+                'Free $rewardName Redeemed!',
+                style: const TextStyle(
+                  color: Color(0xFF8B7355),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -755,6 +789,8 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               ),
             ),
           ],
+            );
+          },
         );
       },
     );

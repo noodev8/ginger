@@ -44,10 +44,15 @@ class _UserPointsSummaryWidgetState extends State<UserPointsSummaryWidget> {
         final currentPoints = loyaltyPoints?.currentPoints ?? 0;
         final firstReward = rewardProvider.firstReward;
         final pointsNeeded = firstReward?.pointsRequired ?? 10; // Fallback to 10 if no rewards loaded
-        final freeCoffees = currentPoints ~/ pointsNeeded; // Integer division - how many free coffees earned
+        final freeRewards = currentPoints ~/ pointsNeeded; // Integer division - how many free rewards earned
+        final allRewards = rewardProvider.rewards ?? [];
+
+        final rewardText = allRewards.length > 1
+          ? (freeRewards == 1 ? 'Free Reward' : 'Free Rewards')
+          : (freeRewards == 1 ? 'Free ${firstReward?.name ?? 'Coffee'}' : 'Free ${firstReward?.name ?? 'Coffee'}s');
 
         return Text(
-          '$currentPoints Points • $freeCoffees Free Coffees Earned',
+          '$currentPoints Points • $freeRewards $rewardText Earned',
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 14,

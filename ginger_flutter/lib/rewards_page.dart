@@ -13,6 +13,31 @@ class RewardsPage extends StatefulWidget {
 }
 
 class _RewardsPageState extends State<RewardsPage> {
+
+  // Helper function to get icon based on reward name
+  IconData _getRewardIcon(String? rewardName) {
+    if (rewardName == null) return Icons.local_cafe;
+
+    final name = rewardName.toLowerCase();
+
+    if (name.contains('coffee')) {
+      return Icons.local_cafe;
+    } else if (name.contains('pastry') || name.contains('cake') || name.contains('muffin') || name.contains('croissant')) {
+      return Icons.cake;
+    } else if (name.contains('lunch') || name.contains('sandwich') || name.contains('salad')) {
+      return Icons.lunch_dining;
+    } else if (name.contains('specialty') || name.contains('latte') || name.contains('cappuccino') || name.contains('mocha')) {
+      return Icons.coffee;
+    } else if (name.contains('upgrade') || name.contains('large')) {
+      return Icons.keyboard_arrow_up;
+    } else if (name.contains('combo')) {
+      return Icons.restaurant;
+    } else {
+      // Default to coffee cup for unknown rewards
+      return Icons.local_cafe;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -187,7 +212,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                 ),
                               ),
                             ),
-                            // Coffee cup icon in center
+                            // Coffee icon in center
                             Container(
                               width: 40,
                               height: 40,
@@ -201,16 +226,10 @@ class _RewardsPageState extends State<RewardsPage> {
                                     color: Colors.white,
                                     size: 20,
                                   )
-                                : Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image.asset(
-                                      'assets/coffee_icon2.png',
-                                      width: 24,
-                                      height: 24,
-                                      fit: BoxFit.contain,
-                                      color: Colors.white,
-                                      colorBlendMode: BlendMode.srcIn,
-                                    ),
+                                : const Icon(
+                                    Icons.local_cafe,
+                                    color: Colors.white,
+                                    size: 20,
                                   ),
                             ),
                           ],
@@ -230,7 +249,9 @@ class _RewardsPageState extends State<RewardsPage> {
                       const SizedBox(height: 4),
                       if (hasFreeReward) ...[
                         Text(
-                          'You have ${availableRewards == 1 ? '1 free coffee' : '$availableRewards free coffees'} ready!',
+                          allRewards.length > 1
+                            ? (availableRewards == 1 ? '1 free reward ready!' : '$availableRewards free rewards ready!')
+                            : (availableRewards == 1 ? '1 free ${firstReward?.name.toLowerCase() ?? 'coffee'} ready!' : '$availableRewards free ${firstReward?.name.toLowerCase() ?? 'coffee'}s ready!'),
                           style: const TextStyle(
                             color: Color(0xFF8B7355),
                             fontSize: 14,
@@ -240,7 +261,9 @@ class _RewardsPageState extends State<RewardsPage> {
                         ),
                       ] else ...[
                         Text(
-                          '$pointsToNext more points to ${firstReward?.name.toLowerCase() ?? 'free coffee'}',
+                          allRewards.length > 1
+                            ? '$pointsToNext more points till next reward'
+                            : '$pointsToNext more points to ${firstReward?.name.toLowerCase() ?? 'free coffee'}',
                           style: const TextStyle(
                             color: Color(0xFF8B7355), // Darker beige
                             fontSize: 14,
@@ -282,7 +305,9 @@ class _RewardsPageState extends State<RewardsPage> {
                           const Icon(Icons.local_cafe, color: Color(0xFF8B7355), size: 28),
                           const SizedBox(width: 8),
                           Text(
-                            availableRewards == 1 ? 'Free Coffee Ready!' : '$availableRewards Free Coffees Ready!',
+                            allRewards.length > 1
+                              ? (availableRewards == 1 ? 'Free Reward Ready!' : '$availableRewards Free Rewards Ready!')
+                              : (availableRewards == 1 ? 'Free ${firstReward?.name ?? 'Coffee'} Ready!' : '$availableRewards Free ${firstReward?.name ?? 'Coffee'}s Ready!'),
                             style: const TextStyle(
                               color: Color(0xFF8B7355),
                               fontSize: 18,
@@ -443,7 +468,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               ),
                               child: canAfford
                                   ? const Icon(Icons.check, color: Colors.white, size: 24)
-                                  : const Icon(Icons.local_cafe, color: Colors.white, size: 24),
+                                  : Icon(_getRewardIcon(reward.name), color: Colors.white, size: 24),
                             ),
                             const SizedBox(width: 16),
 
