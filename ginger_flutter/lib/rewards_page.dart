@@ -340,15 +340,20 @@ class _RewardsPageState extends State<RewardsPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFE0E0E0),
+                              color: const Color(0xFFB2C1B0).withValues(alpha: 0.3),
                               width: 1,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                                blurRadius: 6,
+                                color: const Color(0xFFB2C1B0).withValues(alpha: 0.1),
+                                offset: const Offset(0.0, 3),
                               ),
+                              const BoxShadow(
+                                blurRadius: 2,
+                                color: Color(0xFFE0E0E0),
+                                offset: Offset(0.0, 1),
+                              )
                             ],
                           ),
                           child: allRewards.length == 1
@@ -383,7 +388,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                             value: canAfford ? 1.0 : (currentPoints / reward.pointsRequired).clamp(0.0, 1.0),
                                             strokeWidth: 6,
                                             backgroundColor: Colors.transparent,
-                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFDACEC3)), // Light brown color
+                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFB2C1B0)), // Green color for progress line
                                           ),
                                         ),
                                         // Reward Icon in center
@@ -512,7 +517,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                         value: canAfford ? 1.0 : (currentPoints / reward.pointsRequired).clamp(0.0, 1.0),
                                         strokeWidth: 4,
                                         backgroundColor: Colors.transparent,
-                                        valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF8B4513).withValues(alpha: 0.8)), // Same opaque brown as QR icons
+                                        valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFB2C1B0)), // Green color for progress line
                                       ),
                                     ),
                                     // Reward Icon in center

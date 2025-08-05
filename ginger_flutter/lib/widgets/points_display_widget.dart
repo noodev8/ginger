@@ -137,12 +137,24 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF7EDE4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF8B7355).withValues(alpha: 0.2),
+          color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 6,
+            color: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+            offset: const Offset(0.0, 3),
+          ),
+          const BoxShadow(
+            blurRadius: 2,
+            color: Color(0xFFE0E0E0),
+            offset: Offset(0.0, 1),
+          )
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -177,7 +189,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
                       strokeWidth: 6,
                       backgroundColor: Colors.transparent,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        const Color(0xFFDACEC3), // Light brown color
+                        const Color(0xFF8FBC8F), // Pastel green color for progress line
                       ),
                     ),
                   ),

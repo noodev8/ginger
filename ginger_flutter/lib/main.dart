@@ -1115,19 +1115,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF8B4513).withValues(alpha: 0.1), // Slightly opaque brown
-                          const Color(0xFF8B4513).withValues(alpha: 0.05), // Even lighter brown
-                        ],
+                      color: Colors.white,
+                      border: Border.all(
+                        color: const Color(0xFF8FBC8F).withValues(alpha: 0.2),
+                        width: 1,
                       ),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          blurRadius: 12,
-                          color: Color(0xFFE2DAD2), // Light warm gray shadow
-                          offset: Offset(0.0, 4),
+                          blurRadius: 8,
+                          color: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+                          offset: const Offset(0.0, 4),
+                        ),
+                        const BoxShadow(
+                          blurRadius: 2,
+                          color: Color(0xFFE0E0E0),
+                          offset: Offset(0.0, 1),
                         )
                       ],
                       borderRadius: BorderRadius.circular(24),
@@ -1252,123 +1254,73 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                       children: [
                         // Show My QR Code button (for everyone)
                         Expanded(
-                          child: InkWell(
-                            onTap: _showQRCodeDialog,
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              height: 140,
-                              decoration: BoxDecoration(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _showQRCodeDialog,
                                 borderRadius: BorderRadius.circular(20),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    const Color(0xFF8B4513).withValues(alpha: 0.1), // Slightly opaque brown
-                                    const Color(0xFF8B4513).withValues(alpha: 0.05), // Even lighter brown
-                                  ],
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    blurRadius: 8,
-                                    color: Color(0xFFE2DAD2), // Light warm gray shadow
-                                    offset: Offset(0.0, 4),
-                                  )
-                                ],
-                              ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFDACEC3), // Light brown color
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: const Icon(
-                                        Icons.qr_code_2,
-                                        color: Colors.white,
-                                        size: 40,
-                                      ),
+                                splashColor: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                highlightColor: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+                                child: Container(
+                                  height: 140,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                      width: 2,
                                     ),
-                                    const SizedBox(height: 12),
-                                    const Text(
-                                      'My QR Code',
-                                      style: TextStyle(
-                                        color: Color(0xFF4B2E2B), // Rich coffee brown
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 8,
+                                        color: const Color(0xFF8FBC8F).withValues(alpha: 0.15),
+                                        offset: const Offset(0.0, 4),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Show to earn stamps',
-                                      style: TextStyle(
-                                        color: Color(0xFF6E5C59), // Soft grayish brown
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-
-                        // Staff QR Scanner button (additional button for staff)
-                        if (isStaff) ...[
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: InkWell(
-                              onTap: _showScanQRDialog,
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                height: 140,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      const Color(0xFF8B4513).withValues(alpha: 0.1), // Slightly opaque brown
-                                      const Color(0xFF8B4513).withValues(alpha: 0.05), // Even lighter brown
+                                      const BoxShadow(
+                                        blurRadius: 2,
+                                        color: Color(0xFFE0E0E0),
+                                        offset: Offset(0.0, 1),
+                                      )
                                     ],
                                   ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      blurRadius: 8,
-                                      color: Color(0xFFE2DAD2), // Light warm gray shadow
-                                      offset: Offset(0.0, 4),
-                                    )
-                                  ],
-                                ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFDACEC3), // Light brown color
-                                          borderRadius: BorderRadius.circular(16),
+                                          color: const Color(0xFF8FBC8F),
+                                          borderRadius: BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              blurRadius: 4,
+                                              color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                              offset: const Offset(0.0, 2),
+                                            )
+                                          ],
                                         ),
                                         child: const Icon(
-                                          Icons.qr_code_scanner,
+                                          Icons.qr_code_2,
                                           color: Colors.white,
-                                          size: 40,
+                                          size: 32,
                                         ),
                                       ),
                                       const SizedBox(height: 12),
                                       const Text(
-                                        'Scan Customer',
+                                        'My QR Code',
                                         style: TextStyle(
-                                          color: Color(0xFF4B2E2B), // Rich coffee brown
+                                          color: Color(0xFF2C3E50),
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       const Text(
-                                        'Award stamps',
+                                        'Show to earn stamps',
                                         style: TextStyle(
-                                          color: Color(0xFF6E5C59), // Soft grayish brown
+                                          color: Color(0xFF7F8C8D),
                                           fontSize: 12,
                                         ),
                                       ),
@@ -1377,6 +1329,90 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                 ),
                               ),
                             ),
+                          ),
+                        ),
+
+                        // Staff QR Scanner button (additional button for staff)
+                        if (isStaff) ...[
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _showScanQRDialog,
+                                  borderRadius: BorderRadius.circular(20),
+                                  splashColor: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                  highlightColor: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+                                  child: Container(
+                                    height: 140,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          blurRadius: 8,
+                                          color: const Color(0xFF8FBC8F).withValues(alpha: 0.15),
+                                          offset: const Offset(0.0, 4),
+                                        ),
+                                        const BoxShadow(
+                                          blurRadius: 2,
+                                          color: Color(0xFFE0E0E0),
+                                          offset: Offset(0.0, 1),
+                                        )
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF8FBC8F),
+                                            borderRadius: BorderRadius.circular(20),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 4,
+                                                color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                                offset: const Offset(0.0, 2),
+                                              )
+                                            ],
+                                          ),
+                                          child: const Icon(
+                                            Icons.qr_code_scanner,
+                                            color: Colors.white,
+                                            size: 32,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        const Text(
+                                          'Scan Customer',
+                                          style: TextStyle(
+                                            color: Color(0xFF2C3E50),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          'Award stamps',
+                                          style: TextStyle(
+                                            color: Color(0xFF7F8C8D),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
 
 
