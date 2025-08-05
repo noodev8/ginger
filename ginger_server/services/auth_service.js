@@ -134,10 +134,20 @@ class AuthService {
       const authToken = this.generateToken(user);
       const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
 
-      // Update user with new auth token
+      // Store token in user_tokens table instead of updating user table
       await database.query(
-        'UPDATE app_user SET auth_token = $1, auth_token_expires = $2, last_active_at = NOW() WHERE id = $3',
-        [authToken, expiresAt, user.id]
+        `INSERT INTO user_tokens (user_id, token, expires_at, created_at)
+         VALUES ($1, $2, $3, NOW())
+         ON CONFLICT (user_id, token) DO UPDATE SET
+         expires_at = EXCLUDED.expires_at,
+         last_used_at = NOW()`,
+        [user.id, authToken, expiresAt]
+      );
+
+      // Update user last active time
+      await database.query(
+        'UPDATE app_user SET last_active_at = NOW() WHERE id = $1',
+        [user.id]
       );
 
       // Remove password hash from response
@@ -163,11 +173,13 @@ class AuthService {
       // Verify JWT token
       const decoded = this.verifyToken(token);
 
-      // Get user from database
+      // Get user and token info from database using user_tokens table
       const result = await database.query(
-        `SELECT id, email, display_name, phone, profile_icon_id, staff, email_verified, staff_admin, created_at, auth_token_expires
-         FROM app_user
-         WHERE id = $1 AND auth_token = $2`,
+        `SELECT u.id, u.email, u.display_name, u.phone, u.profile_icon_id, u.staff,
+                u.email_verified, u.staff_admin, u.created_at, t.expires_at as auth_token_expires
+         FROM app_user u
+         INNER JOIN user_tokens t ON u.id = t.user_id
+         WHERE u.id = $1 AND t.token = $2`,
         [decoded.id, token]
       );
 
@@ -179,13 +191,23 @@ class AuthService {
 
       // Check if token is expired
       if (new Date() > new Date(user.auth_token_expires)) {
+        // Clean up expired token
+        await database.query(
+          'DELETE FROM user_tokens WHERE user_id = $1 AND token = $2',
+          [decoded.id, token]
+        );
         throw new Error('Token expired');
       }
 
-      // Update last active
+      // Update last active and token usage
       await database.query(
         'UPDATE app_user SET last_active_at = NOW() WHERE id = $1',
         [user.id]
+      );
+
+      await database.query(
+        'UPDATE user_tokens SET last_used_at = NOW() WHERE user_id = $1 AND token = $2',
+        [user.id, token]
       );
 
       return {
@@ -206,10 +228,10 @@ class AuthService {
     try {
       const decoded = this.verifyToken(token);
 
-      // Clear auth token from database
+      // Remove specific token from user_tokens table
       await database.query(
-        'UPDATE app_user SET auth_token = NULL, auth_token_expires = NULL WHERE id = $1',
-        [decoded.id]
+        'DELETE FROM user_tokens WHERE user_id = $1 AND token = $2',
+        [decoded.id, token]
       );
 
       return true;

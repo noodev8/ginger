@@ -2,8 +2,8 @@ class ApiConfig {
 
 
 
- static const String baseUrl = 'http://192.168.0.15:3001'; // welshpool - updated to port 3001
- //static const String baseUrl = 'http://192.168.1.187:3001'; // work - updated to port 3001
+ //static const String baseUrl = 'http://192.168.0.15:3001'; // welshpool - updated to port 3001
+ static const String baseUrl = 'http://192.168.1.187:3001'; // work - updated to port 3001
 //static const String baseUrl = 'http://192.168.1.173:3001'; // shrewsbury - updated to port 3001
 
   // Authentication endpoints
