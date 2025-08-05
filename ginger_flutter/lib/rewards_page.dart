@@ -383,7 +383,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                             value: canAfford ? 1.0 : (currentPoints / reward.pointsRequired).clamp(0.0, 1.0),
                                             strokeWidth: 6,
                                             backgroundColor: Colors.transparent,
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFDACEC3)), // Light brown color
                                           ),
                                         ),
                                         // Reward Icon in center
@@ -512,7 +512,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                         value: canAfford ? 1.0 : (currentPoints / reward.pointsRequired).clamp(0.0, 1.0),
                                         strokeWidth: 4,
                                         backgroundColor: Colors.transparent,
-                                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                                        valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF8B4513).withValues(alpha: 0.8)), // Same opaque brown as QR icons
                                       ),
                                     ),
                                     // Reward Icon in center

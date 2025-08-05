@@ -1062,18 +1062,37 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
-        body: SafeArea(
-          top: true,
-          child: RefreshIndicator(
-            onRefresh: () async {
-              // Refresh points when user pulls down
-              _refreshPointsIfAuthenticated();
-            },
-            child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+        backgroundColor: const Color(0xFFFAF6F2), // Cream / Light latte background
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFAF6F2), // Cream / Light latte
+                Color(0xFFFFFFFF), // Pure white fade
+              ],
+            ),
+          ),
+          child: SafeArea(
+            top: true,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                // Refresh points when user pulls down
+                _refreshPointsIfAuthenticated();
+              },
+              child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    kBottomNavigationBarHeight,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                children: [
                 // Header with Logo Text
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
@@ -1096,15 +1115,22 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF8B4513).withValues(alpha: 0.1), // Slightly opaque brown
+                          const Color(0xFF8B4513).withValues(alpha: 0.05), // Even lighter brown
+                        ],
+                      ),
                       boxShadow: const [
                         BoxShadow(
-                          blurRadius: 10,
-                          color: Color(0x1A000000),
-                          offset: Offset(0.0, 5),
+                          blurRadius: 12,
+                          color: Color(0xFFE2DAD2), // Light warm gray shadow
+                          offset: Offset(0.0, 4),
                         )
                       ],
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -1130,7 +1156,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                         child: Text(
                                           'Welcome back,',
                                           style: TextStyle(
-                                            color: Color(0xFF8B7355), // Darker beige
+                                            color: Color(0xFF6E5C59), // Soft grayish brown
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -1141,7 +1167,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                           Text(
                                             displayName,
                                             style: const TextStyle(
-                                              color: Color(0xFF2F1B14),
+                                              color: Color(0xFF4B2E2B), // Rich coffee brown
                                               fontSize: 22,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -1151,7 +1177,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFF2F1B14),
+                                                color: const Color(0xFF3E2723), // Deep roast brown
                                                 borderRadius: BorderRadius.circular(12),
                                               ),
                                               child: const Text(
@@ -1183,7 +1209,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                   width: 60,
                                   height: 60,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFF8B7355), // Darker beige to match buttons
+                                    color: Color(0xFFC3A48B), // Gentle mocha brown
                                     shape: BoxShape.circle,
                                   ),
                                   child: Consumer<AuthProvider>(
@@ -1221,98 +1247,139 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                   final isStaff = user?.staff ?? false;
 
                   return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
                       children: [
                         // Show My QR Code button (for everyone)
-                        ElevatedButton.icon(
-                          onPressed: _showQRCodeDialog,
-                          icon: const Icon(
-                            Icons.qr_code,
-                            color: Colors.white
-                          ),
-                          label: const Text('Show My QR Code'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B7355), // Darker beige
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 56),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                        Expanded(
+                          child: InkWell(
+                            onTap: _showQRCodeDialog,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              height: 140,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    const Color(0xFF8B4513).withValues(alpha: 0.1), // Slightly opaque brown
+                                    const Color(0xFF8B4513).withValues(alpha: 0.05), // Even lighter brown
+                                  ],
+                                ),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    blurRadius: 8,
+                                    color: Color(0xFFE2DAD2), // Light warm gray shadow
+                                    offset: Offset(0.0, 4),
+                                  )
+                                ],
+                              ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDACEC3), // Light brown color
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: const Icon(
+                                        Icons.qr_code_2,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      'My QR Code',
+                                      style: TextStyle(
+                                        color: Color(0xFF4B2E2B), // Rich coffee brown
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    const Text(
+                                      'Show to earn stamps',
+                                      style: TextStyle(
+                                        color: Color(0xFF6E5C59), // Soft grayish brown
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
                           ),
-                        ),
 
                         // Staff QR Scanner button (additional button for staff)
                         if (isStaff) ...[
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: _showScanQRDialog,
-                            icon: const Icon(
-                              Icons.qr_code_scanner,
-                              color: Colors.white
-                            ),
-                            label: const Text('Scan Customer QR Code'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2F1B14), // Darker color for staff function
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size(double.infinity, 56),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: InkWell(
+                              onTap: _showScanQRDialog,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                height: 140,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      const Color(0xFF8B4513).withValues(alpha: 0.1), // Slightly opaque brown
+                                      const Color(0xFF8B4513).withValues(alpha: 0.05), // Even lighter brown
+                                    ],
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      blurRadius: 8,
+                                      color: Color(0xFFE2DAD2), // Light warm gray shadow
+                                      offset: Offset(0.0, 4),
+                                    )
+                                  ],
+                                ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFDACEC3), // Light brown color
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        child: const Icon(
+                                          Icons.qr_code_scanner,
+                                          color: Colors.white,
+                                          size: 40,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      const Text(
+                                        'Scan Customer',
+                                        style: TextStyle(
+                                          color: Color(0xFF4B2E2B), // Rich coffee brown
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Award stamps',
+                                        style: TextStyle(
+                                          color: Color(0xFF6E5C59), // Soft grayish brown
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
                             ),
-                          ),
                         ],
 
-                        // Standard customer buttons (for everyone)
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            _launchURL('https://www.gingerandcocoffeeshop.co.uk/menu');
-                          },
-                          icon: const Icon(Icons.restaurant_menu, color: Color(0xFF8B7355)),
-                          label: const Text('Menu'),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: const Color(0xFF8B7355), // Darker beige
-                            minimumSize: const Size(double.infinity, 56),
-                            side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: _showFindUsDialog,
-                          icon: const Icon(Icons.location_on, color: Color(0xFF8B7355)),
-                          label: const Text('Find us'),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: const Color(0xFF8B7355), // Darker beige
-                            minimumSize: const Size(double.infinity, 56),
-                            side: const BorderSide(color: Color(0xFF8B7355), width: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+
                       ],
                     ),
                   );
@@ -1322,13 +1389,15 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
 
 
-            ],
+              ],
+                ),
+              ),
             ),
-          ),
-        ),
           ), // Close RefreshIndicator
-        ),
-    );
+        ), // Close SafeArea
+      ), // Close Container
+    ), // Close Scaffold
+    ); // Close GestureDetector
   }
 }
 

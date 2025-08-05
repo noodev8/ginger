@@ -176,8 +176,8 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
                       value: progress,
                       strokeWidth: 6,
                       backgroundColor: Colors.transparent,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF8B7355),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        const Color(0xFFDACEC3), // Light brown color
                       ),
                     ),
                   ),
