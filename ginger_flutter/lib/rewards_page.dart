@@ -150,51 +150,113 @@ class _RewardsPageState extends State<RewardsPage> {
 
             // Points Display with Refresh Button
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              padding: const EdgeInsets.fromLTRB(60, 16, 60, 24),
               child: Column(
                 children: [
-                  // Centered large points display
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '$currentPoints',
-                        style: TextStyle(
-                          color: const Color(0xFF8B7355),
-                          fontSize: 64,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -2,
-                          shadows: [
-                            Shadow(
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                  // Coffee beans and points display
+                  SizedBox(
+                    width: double.infinity,
+                    height: 100,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Coffee beans positioned around the points
+                        Positioned(
+                          left: 20,
+                          top: 10,
+                          child: Transform.rotate(
+                            angle: -0.3,
+                            child: Icon(
+                              Icons.coffee,
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.4),
+                              size: 24,
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'pts',
-                        style: TextStyle(
-                          color: const Color(0xFF8B7355).withValues(alpha: 0.8),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+                        Positioned(
+                          right: 25,
+                          top: 15,
+                          child: Transform.rotate(
+                            angle: 0.4,
+                            child: Icon(
+                              Icons.coffee,
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.35),
+                              size: 20,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                        Positioned(
+                          left: 15,
+                          bottom: 15,
+                          child: Transform.rotate(
+                            angle: 0.2,
+                            child: Icon(
+                              Icons.coffee,
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.45),
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 15,
+                          bottom: 10,
+                          child: Transform.rotate(
+                            angle: -0.5,
+                            child: Icon(
+                              Icons.coffee,
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.38),
+                              size: 22,
+                            ),
+                          ),
+                        ),
 
-                  // Subtitle with refresh button
+                      // Centered large points display
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '$currentPoints',
+                            style: TextStyle(
+                              color: const Color(0xFF8B7355),
+                              fontSize: 64,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -2,
+                              shadows: [
+                                Shadow(
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                  color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'pts',
+                            style: TextStyle(
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.8),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Points until next reward with refresh button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        currentPoints == 1 ? 'point earned' : 'points earned',
+                        allRewards.isNotEmpty
+                          ? '${allRewards.first.pointsRequired - (currentPoints % allRewards.first.pointsRequired)} more for next reward'
+                          : 'Keep collecting points!',
                         style: TextStyle(
                           color: const Color(0xFF8B7355).withValues(alpha: 0.6),
                           fontSize: 14,
