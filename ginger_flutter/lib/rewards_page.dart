@@ -89,27 +89,6 @@ class _RewardsPageState extends State<RewardsPage> {
 
         return Scaffold(
           backgroundColor: const Color(0xFFFAF6F2), // Same as main screen background
-          appBar: AppBar(
-            title: const Text(
-              'Your Rewards',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            backgroundColor: const Color(0xFF8B7355), // Darker beige
-            iconTheme: const IconThemeData(color: Colors.white),
-            elevation: 0,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  pointsProvider.refreshUserPoints(user.id!);
-                  rewardProvider.refreshRewards();
-                },
-              ),
-            ],
-          ),
           body: isLoading
               ? const Center(
                   child: CircularProgressIndicator(
@@ -159,41 +138,96 @@ class _RewardsPageState extends State<RewardsPage> {
               : SingleChildScrollView(
         child: Column(
           children: [
-            // Points Display
+            // Logo Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 4),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFF8B7355).withValues(alpha: 0.3),
-                    width: 2,
+              padding: const EdgeInsets.only(top: 40, bottom: 8),
+              child: Image.asset(
+                'assets/logotext.png',
+                height: 80,
+                fit: BoxFit.contain,
+              ),
+            ),
+
+            // Points Display with Refresh Button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: Column(
+                children: [
+                  // Centered large points display
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$currentPoints',
+                        style: TextStyle(
+                          color: const Color(0xFF8B7355),
+                          fontSize: 64,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -2,
+                          shadows: [
+                            Shadow(
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'pts',
+                        style: TextStyle(
+                          color: const Color(0xFF8B7355).withValues(alpha: 0.8),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 8,
-                      color: const Color(0xFF8B7355).withValues(alpha: 0.15),
-                      offset: const Offset(0.0, 4),
-                    ),
-                    const BoxShadow(
-                      blurRadius: 2,
-                      color: Color(0xFFE0E0E0),
-                      offset: Offset(0.0, 1),
-                    )
-                  ],
-                ),
-                child: Text(
-                  'You have $currentPoints points',
-                  style: const TextStyle(
-                    color: Color(0xFF8B7355),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 8),
+
+                  // Subtitle with refresh button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        currentPoints == 1 ? 'point earned' : 'points earned',
+                        style: TextStyle(
+                          color: const Color(0xFF8B7355).withValues(alpha: 0.6),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            pointsProvider.refreshUserPoints(user.id!);
+                            rewardProvider.refreshRewards();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.refresh,
+                              color: Color(0xFF8B7355),
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                ],
               ),
             ),
 
