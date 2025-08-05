@@ -87,13 +87,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
                   ),
                   SizedBox(height: 24),
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF603d22)),
                   ),
                   SizedBox(height: 16),
                   Text(
                     'Loading...',
                     style: TextStyle(
-                      color: Color(0xFF8B7355),
+                      color: Color(0xFF603d22),
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -158,7 +158,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF8B7355),
+        selectedItemColor: const Color(0xFF603d22),
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
@@ -330,7 +330,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B7355),
+                    color: const Color(0xFF603d22),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Column(
@@ -366,7 +366,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B7355),
+                    color: const Color(0xFF603d22),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Consumer<AuthProvider>(
@@ -400,7 +400,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8B7355),
+                        color: const Color(0xFF603d22),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
@@ -428,7 +428,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B7355), // Darker beige
+                      backgroundColor: const Color(0xFF603d22), // Darker brown
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -500,7 +500,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
           title: const Text(
             'QR Code Scanned!',
             style: TextStyle(
-              color: Color(0xFF8B7355),
+              color: Color(0xFF603d22),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -543,7 +543,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'OK',
-                style: TextStyle(color: Color(0xFF8B7355)),
+                style: TextStyle(color: Color(0xFF603d22)),
               ),
             ),
           ],
@@ -566,7 +566,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               title: const Text(
                 'Reward Available!',
                 style: TextStyle(
-                  color: Color(0xFF8B7355),
+                  color: Color(0xFF603d22),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -575,7 +575,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                 children: [
                   Icon(
                     _getRewardIcon(rewardName),
-                    color: const Color(0xFF8B7355),
+                    color: const Color(0xFF603d22),
                     size: 48,
                   ),
                   const SizedBox(height: 16),
@@ -614,7 +614,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                     _redeemReward(userId, userName);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B7355),
+                    backgroundColor: const Color(0xFF603d22),
                     foregroundColor: Colors.white,
                   ),
                   child: Text('Yes, Redeem $rewardName'),
@@ -645,7 +645,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'OK',
-                style: TextStyle(color: Color(0xFF8B7355)),
+                style: TextStyle(color: Color(0xFF603d22)),
               ),
             ),
           ],
@@ -662,7 +662,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
           title: const Text(
             'Choose Reward',
             style: TextStyle(
-              color: Color(0xFF8B7355),
+              color: Color(0xFF603d22),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -694,7 +694,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                       _redeemSpecificReward(userId, userName, reward);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B7355),
+                      backgroundColor: const Color(0xFF603d22),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       shape: RoundedRectangleBorder(
@@ -745,7 +745,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               },
               child: const Text(
                 'Add Point Instead',
-                style: TextStyle(color: Color(0xFF8B7355)),
+                style: TextStyle(color: Color(0xFF603d22)),
               ),
             ),
           ],
@@ -866,7 +866,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               title: Text(
                 'Free $rewardName Redeemed!',
                 style: const TextStyle(
-                  color: Color(0xFF8B7355),
+                  color: Color(0xFF603d22),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -909,7 +909,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'OK',
-                style: TextStyle(color: Color(0xFF8B7355)),
+                style: TextStyle(color: Color(0xFF603d22)),
               ),
             ),
           ],
@@ -940,7 +940,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF8B7355),
+                    color: Color(0xFF603d22),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -970,7 +970,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                     margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF8B7355), width: 2),
+                      border: Border.all(color: const Color(0xFF603d22), width: 2),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
@@ -997,14 +997,14 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
             children: [
               Icon(
                 Icons.location_on,
-                color: Color(0xFF8B7355),
+                color: Color(0xFF603d22),
                 size: 28,
               ),
               SizedBox(width: 8),
               Text(
                 'Find us',
                 style: TextStyle(
-                  color: Color(0xFF8B7355),
+                  color: Color(0xFF603d22),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1019,7 +1019,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF8B7355),
+                  color: Color(0xFF603d22),
                 ),
               ),
               SizedBox(height: 12),
@@ -1039,7 +1039,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
               child: const Text(
                 'Close',
                 style: TextStyle(
-                  color: Color(0xFF8B7355),
+                  color: Color(0xFF603d22),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1117,13 +1117,13 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
-                        color: const Color(0xFF8B7355).withValues(alpha: 0.2),
+                        color: const Color(0xFF603d22).withValues(alpha: 0.2),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
                           blurRadius: 8,
-                          color: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                          color: const Color(0xFF603d22).withValues(alpha: 0.1),
                           offset: const Offset(0.0, 4),
                         ),
                         const BoxShadow(
@@ -1261,21 +1261,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                               child: InkWell(
                                 onTap: _showQRCodeDialog,
                                 borderRadius: BorderRadius.circular(20),
-                                splashColor: const Color(0xFF8B7355).withValues(alpha: 0.3),
-                                highlightColor: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                                splashColor: const Color(0xFF603d22).withValues(alpha: 0.3),
+                                highlightColor: const Color(0xFF603d22).withValues(alpha: 0.1),
                                 child: Container(
                                   height: 140,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: Colors.white,
                                     border: Border.all(
-                                      color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                      color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                       width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
                                         blurRadius: 8,
-                                        color: const Color(0xFF8B7355).withValues(alpha: 0.15),
+                                        color: const Color(0xFF603d22).withValues(alpha: 0.15),
                                         offset: const Offset(0.0, 4),
                                       ),
                                       const BoxShadow(
@@ -1291,12 +1291,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                       Container(
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF8B7355),
+                                          color: const Color(0xFF603d22),
                                           borderRadius: BorderRadius.circular(20),
                                           boxShadow: [
                                             BoxShadow(
                                               blurRadius: 4,
-                                              color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                              color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                               offset: const Offset(0.0, 2),
                                             )
                                           ],
@@ -1343,21 +1343,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                 child: InkWell(
                                   onTap: _showScanQRDialog,
                                   borderRadius: BorderRadius.circular(20),
-                                  splashColor: const Color(0xFF8B7355).withValues(alpha: 0.3),
-                                  highlightColor: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                                  splashColor: const Color(0xFF603d22).withValues(alpha: 0.3),
+                                  highlightColor: const Color(0xFF603d22).withValues(alpha: 0.1),
                                   child: Container(
                                     height: 140,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       color: Colors.white,
                                       border: Border.all(
-                                        color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                        color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                         width: 2,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
                                           blurRadius: 8,
-                                          color: const Color(0xFF8B7355).withValues(alpha: 0.15),
+                                          color: const Color(0xFF603d22).withValues(alpha: 0.15),
                                           offset: const Offset(0.0, 4),
                                         ),
                                         const BoxShadow(
@@ -1373,12 +1373,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                         Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF8B7355),
+                                            color: const Color(0xFF603d22),
                                             borderRadius: BorderRadius.circular(20),
                                             boxShadow: [
                                               BoxShadow(
                                                 blurRadius: 4,
-                                                color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                                color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                                 offset: const Offset(0.0, 2),
                                               )
                                             ],

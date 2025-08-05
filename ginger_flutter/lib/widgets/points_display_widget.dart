@@ -140,13 +140,13 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+          color: const Color(0xFF603d22).withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             blurRadius: 6,
-            color: const Color(0xFF8B7355).withValues(alpha: 0.1),
+            color: const Color(0xFF603d22).withValues(alpha: 0.1),
             offset: const Offset(0.0, 3),
           ),
           const BoxShadow(
@@ -189,7 +189,7 @@ class _PointsDisplayWidgetState extends State<PointsDisplayWidget> {
                       strokeWidth: 6,
                       backgroundColor: Colors.transparent,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        const Color(0xFF8B7355), // Coffee brown color for progress line
+                        const Color(0xFF603d22), // Coffee brown color for progress line
                       ),
                     ),
                   ),

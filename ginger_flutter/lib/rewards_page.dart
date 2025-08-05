@@ -66,7 +66,7 @@ class _RewardsPageState extends State<RewardsPage> {
             backgroundColor: const Color(0xFFF7EDE4),
             appBar: AppBar(
               title: const Text('Your Rewards'),
-              backgroundColor: const Color(0xFF8B7355),
+              backgroundColor: const Color(0xFF603d22),
             ),
             body: const Center(
               child: Text('User not found'),
@@ -92,7 +92,7 @@ class _RewardsPageState extends State<RewardsPage> {
           body: isLoading
               ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF603d22)),
                   ),
                 )
               : error != null
@@ -127,7 +127,7 @@ class _RewardsPageState extends State<RewardsPage> {
                           ElevatedButton(
                             onPressed: () => pointsProvider.refreshUserPoints(user.id!),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B7355),
+                          backgroundColor: const Color(0xFF603d22),
                           foregroundColor: Colors.white,
                         ),
                         child: const Text('Retry'),
@@ -168,7 +168,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             angle: -0.3,
                             child: Icon(
                               Icons.coffee,
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.4),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.4),
                               size: 24,
                             ),
                           ),
@@ -180,7 +180,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             angle: 0.4,
                             child: Icon(
                               Icons.coffee,
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.35),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.35),
                               size: 20,
                             ),
                           ),
@@ -192,7 +192,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             angle: 0.2,
                             child: Icon(
                               Icons.coffee,
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.45),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.45),
                               size: 18,
                             ),
                           ),
@@ -204,7 +204,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             angle: -0.5,
                             child: Icon(
                               Icons.coffee,
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.38),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.38),
                               size: 22,
                             ),
                           ),
@@ -219,7 +219,7 @@ class _RewardsPageState extends State<RewardsPage> {
                           Text(
                             '$currentPoints',
                             style: TextStyle(
-                              color: const Color(0xFF8B7355),
+                              color: const Color(0xFF603d22),
                               fontSize: 64,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -2,
@@ -227,7 +227,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                 Shadow(
                                   offset: const Offset(0, 2),
                                   blurRadius: 4,
-                                  color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                  color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                 ),
                               ],
                             ),
@@ -236,7 +236,7 @@ class _RewardsPageState extends State<RewardsPage> {
                           Text(
                             'pts',
                             style: TextStyle(
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.8),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.8),
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
@@ -258,7 +258,7 @@ class _RewardsPageState extends State<RewardsPage> {
                           ? '${allRewards.first.pointsRequired - (currentPoints % allRewards.first.pointsRequired)} more for next reward'
                           : 'Keep collecting points!',
                         style: TextStyle(
-                          color: const Color(0xFF8B7355).withValues(alpha: 0.6),
+                          color: const Color(0xFF603d22).withValues(alpha: 0.6),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           letterSpacing: 0.3,
@@ -276,12 +276,12 @@ class _RewardsPageState extends State<RewardsPage> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(
                               Icons.refresh,
-                              color: Color(0xFF8B7355),
+                              color: Color(0xFF603d22),
                               size: 16,
                             ),
                           ),
@@ -304,11 +304,11 @@ class _RewardsPageState extends State<RewardsPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFFDF8), // Slightly off-white paper color
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF8B7355), width: 2),
+                    border: Border.all(color: const Color(0xFF603d22), width: 2),
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 12,
-                        color: const Color(0xFF8B7355).withValues(alpha: 0.2),
+                        color: const Color(0xFF603d22).withValues(alpha: 0.2),
                         offset: const Offset(0.0, 6),
                       ),
                       const BoxShadow(
@@ -330,18 +330,18 @@ class _RewardsPageState extends State<RewardsPage> {
                                 width: 40,
                                 height: 2,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                  color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                   borderRadius: BorderRadius.circular(1),
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              const Icon(Icons.local_cafe, color: Color(0xFF8B7355), size: 32),
+                              const Icon(Icons.local_cafe, color: Color(0xFF603d22), size: 32),
                               const SizedBox(width: 12),
                               Container(
                                 width: 40,
                                 height: 2,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                  color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                   borderRadius: BorderRadius.circular(1),
                                 ),
                               ),
@@ -353,7 +353,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               ? (availableRewards == 1 ? 'Free Reward Ready!' : '$availableRewards Free Rewards Ready!')
                               : (availableRewards == 1 ? 'Free ${firstReward?.name ?? 'Coffee'} Ready!' : '$availableRewards Free ${firstReward?.name ?? 'Coffee'}s Ready!'),
                             style: const TextStyle(
-                              color: Color(0xFF8B7355),
+                              color: Color(0xFF603d22),
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -371,12 +371,12 @@ class _RewardsPageState extends State<RewardsPage> {
                           color: const Color(0xFFFFFEFC), // Pure paper white
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFF8B7355).withValues(alpha: 0.2),
+                            color: const Color(0xFF603d22).withValues(alpha: 0.2),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -388,7 +388,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             Text(
                               'DAILY STAMP',
                               style: TextStyle(
-                                color: const Color(0xFF8B7355).withValues(alpha: 0.8),
+                                color: const Color(0xFF603d22).withValues(alpha: 0.8),
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 2.0,
@@ -398,7 +398,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             Text(
                               'LOYALTY CARD',
                               style: TextStyle(
-                                color: const Color(0xFF8B7355).withValues(alpha: 0.6),
+                                color: const Color(0xFF603d22).withValues(alpha: 0.6),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: 1.5,
@@ -416,11 +416,11 @@ class _RewardsPageState extends State<RewardsPage> {
                                   width: 70,
                                   height: 70,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF8B7355),
+                                    color: const Color(0xFF603d22),
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                        color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -452,7 +452,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               width: 100,
                               height: 1,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                color: const Color(0xFF603d22).withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(0.5),
                               ),
                             ),
@@ -469,7 +469,7 @@ class _RewardsPageState extends State<RewardsPage> {
                             child: ElevatedButton(
                               onPressed: () => _showQRCode(context, user.id!),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF8B7355),
+                                backgroundColor: const Color(0xFF603d22),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
@@ -515,13 +515,13 @@ class _RewardsPageState extends State<RewardsPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                              color: const Color(0xFF603d22).withValues(alpha: 0.3),
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 blurRadius: 8,
-                                color: const Color(0xFF8B7355).withValues(alpha: 0.15),
+                                color: const Color(0xFF603d22).withValues(alpha: 0.15),
                                 offset: const Offset(0.0, 4),
                               ),
                               const BoxShadow(
@@ -563,7 +563,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                             value: canAfford ? 1.0 : (currentPoints / reward.pointsRequired).clamp(0.0, 1.0),
                                             strokeWidth: 6,
                                             backgroundColor: Colors.transparent,
-                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF8B7355)), // Coffee brown color for progress line
+                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF603d22)), // Coffee brown color for progress line
                                           ),
                                         ),
                                         // Reward Icon in center
@@ -571,7 +571,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                           width: 50,
                                           height: 50,
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF8B7355),
+                                            color: const Color(0xFF603d22),
                                             borderRadius: BorderRadius.circular(25),
                                           ),
                                           child: Icon(_getRewardIcon(reward.name), color: Colors.white, size: 26),
@@ -618,7 +618,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF8B7355),
+                                      color: const Color(0xFF603d22),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -700,7 +700,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                       width: 44,
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF8B7355),
+                                        color: const Color(0xFF603d22),
                                         borderRadius: BorderRadius.circular(22),
                                       ),
                                       child: Icon(_getRewardIcon(reward.name), color: Colors.white, size: 22),
@@ -749,7 +749,7 @@ class _RewardsPageState extends State<RewardsPage> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF8B7355),
+                                  color: const Color(0xFF603d22),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -830,7 +830,7 @@ class _RewardsPageState extends State<RewardsPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B7355),
+                    color: const Color(0xFF603d22),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Column(
@@ -866,7 +866,7 @@ class _RewardsPageState extends State<RewardsPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B7355),
+                    color: const Color(0xFF603d22),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Consumer<AuthProvider>(
@@ -894,7 +894,7 @@ class _RewardsPageState extends State<RewardsPage> {
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B7355),
+                    backgroundColor: const Color(0xFF603d22),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                     shape: RoundedRectangleBorder(
