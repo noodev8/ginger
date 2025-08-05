@@ -1117,13 +1117,13 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
-                        color: const Color(0xFF8FBC8F).withValues(alpha: 0.2),
+                        color: const Color(0xFF8B7355).withValues(alpha: 0.2),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
                           blurRadius: 8,
-                          color: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+                          color: const Color(0xFF8B7355).withValues(alpha: 0.1),
                           offset: const Offset(0.0, 4),
                         ),
                         const BoxShadow(
@@ -1261,21 +1261,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                               child: InkWell(
                                 onTap: _showQRCodeDialog,
                                 borderRadius: BorderRadius.circular(20),
-                                splashColor: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
-                                highlightColor: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+                                splashColor: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                highlightColor: const Color(0xFF8B7355).withValues(alpha: 0.1),
                                 child: Container(
                                   height: 140,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: Colors.white,
                                     border: Border.all(
-                                      color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                      color: const Color(0xFF8B7355).withValues(alpha: 0.3),
                                       width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
                                         blurRadius: 8,
-                                        color: const Color(0xFF8FBC8F).withValues(alpha: 0.15),
+                                        color: const Color(0xFF8B7355).withValues(alpha: 0.15),
                                         offset: const Offset(0.0, 4),
                                       ),
                                       const BoxShadow(
@@ -1291,12 +1291,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                       Container(
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF8FBC8F),
+                                          color: const Color(0xFF8B7355),
                                           borderRadius: BorderRadius.circular(20),
                                           boxShadow: [
                                             BoxShadow(
                                               blurRadius: 4,
-                                              color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                              color: const Color(0xFF8B7355).withValues(alpha: 0.3),
                                               offset: const Offset(0.0, 2),
                                             )
                                           ],
@@ -1343,21 +1343,21 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                 child: InkWell(
                                   onTap: _showScanQRDialog,
                                   borderRadius: BorderRadius.circular(20),
-                                  splashColor: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
-                                  highlightColor: const Color(0xFF8FBC8F).withValues(alpha: 0.1),
+                                  splashColor: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                  highlightColor: const Color(0xFF8B7355).withValues(alpha: 0.1),
                                   child: Container(
                                     height: 140,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       color: Colors.white,
                                       border: Border.all(
-                                        color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                        color: const Color(0xFF8B7355).withValues(alpha: 0.3),
                                         width: 2,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
                                           blurRadius: 8,
-                                          color: const Color(0xFF8FBC8F).withValues(alpha: 0.15),
+                                          color: const Color(0xFF8B7355).withValues(alpha: 0.15),
                                           offset: const Offset(0.0, 4),
                                         ),
                                         const BoxShadow(
@@ -1373,12 +1373,12 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                                         Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF8FBC8F),
+                                            color: const Color(0xFF8B7355),
                                             borderRadius: BorderRadius.circular(20),
                                             boxShadow: [
                                               BoxShadow(
                                                 blurRadius: 4,
-                                                color: const Color(0xFF8FBC8F).withValues(alpha: 0.3),
+                                                color: const Color(0xFF8B7355).withValues(alpha: 0.3),
                                                 offset: const Offset(0.0, 2),
                                               )
                                             ],
