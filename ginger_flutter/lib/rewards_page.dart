@@ -88,7 +88,7 @@ class _RewardsPageState extends State<RewardsPage> {
         final allRewards = rewardProvider.rewards ?? [];
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
+          backgroundColor: const Color(0xFFFAF6F2), // Same as main screen background
           appBar: AppBar(
             title: const Text(
               'Your Rewards',
@@ -164,17 +164,33 @@ class _RewardsPageState extends State<RewardsPage> {
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 4),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B7355),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 8,
+                      color: const Color(0xFF8B7355).withValues(alpha: 0.15),
+                      offset: const Offset(0.0, 4),
+                    ),
+                    const BoxShadow(
+                      blurRadius: 2,
+                      color: Color(0xFFE0E0E0),
+                      offset: Offset(0.0, 1),
+                    )
+                  ],
                 ),
                 child: Text(
                   'You have $currentPoints points',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF8B7355),
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -188,97 +204,160 @@ class _RewardsPageState extends State<RewardsPage> {
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF8B7355), width: 3),
+                    color: const Color(0xFFFFFDF8), // Slightly off-white paper color
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF8B7355), width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                        color: const Color(0xFF8B7355).withValues(alpha: 0.2),
+                        offset: const Offset(0.0, 6),
                       ),
+                      const BoxShadow(
+                        blurRadius: 4,
+                        color: Color(0xFFE0E0E0),
+                        offset: Offset(0.0, 2),
+                      )
                     ],
                   ),
                   child: Column(
                     children: [
-                      // Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      // Header with decorative elements
+                      Column(
                         children: [
-                          const Icon(Icons.local_cafe, color: Color(0xFF8B7355), size: 28),
-                          const SizedBox(width: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 2,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Icon(Icons.local_cafe, color: Color(0xFF8B7355), size: 32),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 40,
+                                height: 2,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
                           Text(
                             allRewards.length > 1
                               ? (availableRewards == 1 ? 'Free Reward Ready!' : '$availableRewards Free Rewards Ready!')
                               : (availableRewards == 1 ? 'Free ${firstReward?.name ?? 'Coffee'} Ready!' : '$availableRewards Free ${firstReward?.name ?? 'Coffee'}s Ready!'),
                             style: const TextStyle(
                               color: Color(0xFF8B7355),
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 32),
 
-                      // Stamp Card
+                      // Paper Stamp Card
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF7EDE4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF8B7355), width: 1),
+                          color: const Color(0xFFFFFEFC), // Pure paper white
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF8B7355).withValues(alpha: 0.2),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              'COFFEE REWARDS',
+                            // Stamp card title
+                            Text(
+                              'DAILY STAMP',
                               style: TextStyle(
-                                color: Color(0xFF8B7355),
-                                fontSize: 14,
+                                color: const Color(0xFF8B7355).withValues(alpha: 0.8),
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
+                                letterSpacing: 2.0,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
+                            Text(
+                              'LOYALTY CARD',
+                              style: TextStyle(
+                                color: const Color(0xFF8B7355).withValues(alpha: 0.6),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
 
-                            // Stamps Grid
+                            // Circular Stamps Grid
                             Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
+                              spacing: 16,
+                              runSpacing: 16,
                               alignment: WrapAlignment.center,
                               children: List.generate(availableRewards, (index) =>
                                 Container(
-                                  width: 60,
-                                  height: 60,
+                                  width: 70,
+                                  height: 70,
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF8B7355),
-                                    borderRadius: BorderRadius.circular(8),
+                                    shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
+                                        color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
                                       ),
                                     ],
                                   ),
-                                  child: const Column(
+                                  child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.local_cafe, color: Colors.white, size: 24),
-                                      Text(
+                                      const Icon(Icons.local_cafe, color: Colors.white, size: 28),
+                                      const SizedBox(height: 4),
+                                      const Text(
                                         'FREE',
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 8,
+                                          fontSize: 10,
                                           fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Bottom decorative line
+                            Container(
+                              width: 100,
+                              height: 1,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(0.5),
                               ),
                             ),
                           ],
@@ -340,14 +419,14 @@ class _RewardsPageState extends State<RewardsPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFB2C1B0).withValues(alpha: 0.3),
-                              width: 1,
+                              color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+                              width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                blurRadius: 6,
-                                color: const Color(0xFFB2C1B0).withValues(alpha: 0.1),
-                                offset: const Offset(0.0, 3),
+                                blurRadius: 8,
+                                color: const Color(0xFF8B7355).withValues(alpha: 0.15),
+                                offset: const Offset(0.0, 4),
                               ),
                               const BoxShadow(
                                 blurRadius: 2,
@@ -388,7 +467,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                             value: canAfford ? 1.0 : (currentPoints / reward.pointsRequired).clamp(0.0, 1.0),
                                             strokeWidth: 6,
                                             backgroundColor: Colors.transparent,
-                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFB2C1B0)), // Green color for progress line
+                                            valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF8B7355)), // Coffee brown color for progress line
                                           ),
                                         ),
                                         // Reward Icon in center
