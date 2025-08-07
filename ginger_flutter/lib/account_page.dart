@@ -79,12 +79,12 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: const Color(0xFF8B7355).withValues(alpha: 0.1), // Darker beige
+              color: const Color(0xFF603d22).withValues(alpha: 0.1), // Coffee brown
               borderRadius: BorderRadius.circular(30),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF8B7355), // Darker beige
+              color: const Color(0xFF603d22), // Coffee brown
               size: 30,
             ),
           ),
@@ -94,7 +94,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF8B7355), // Darker beige
+              color: Color(0xFF603d22), // Coffee brown
             ),
           ),
         ],
@@ -108,7 +108,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: const Color(0xFF8B7355), // Darker beige
+        backgroundColor: const Color(0xFF603d22), // Coffee brown
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -127,9 +127,9 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7EDE4), // Updated beige background
+      backgroundColor: const Color(0xFFFAF6F2), // Same as main screen background
       appBar: AppBar(
-        backgroundColor: const Color(0xFF8B7355), // Darker beige
+        backgroundColor: const Color(0xFF603d22), // Coffee brown
         foregroundColor: Colors.white,
         title: const Text(
           'My Account',
@@ -145,7 +145,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
           onRefresh: () async {
             _refreshPoints();
           },
-          color: const Color(0xFF8B7355),
+          color: const Color(0xFF603d22),
           backgroundColor: Colors.white,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -156,7 +156,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF8B7355), Color(0xFFA0956B)], // Darker beige gradient
+                    colors: [Color(0xFF603d22), Color(0xFF8B7355)], // Coffee brown gradient
                     stops: [0, 1],
                     begin: AlignmentDirectional(1, 1),
                     end: AlignmentDirectional(-1, -1),
@@ -185,7 +185,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                 width: 30,
                                 height: 30,
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFF8B7355), // Darker beige
+                                  color: Color(0xFF603d22), // Coffee brown
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -270,7 +270,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                 const Text(
                                   'Loyalty Points',
                                   style: TextStyle(
-                                    color: Color(0xFF8B4513),
+                                    color: Color(0xFF603d22),
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -279,7 +279,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                   IconButton(
                                     icon: const Icon(
                                       Icons.refresh,
-                                      color: Color(0xFF8B4513),
+                                      color: Color(0xFF603d22),
                                       size: 20,
                                     ),
                                     onPressed: () => pointsProvider.refreshUserPoints(user!.id!),
@@ -291,13 +291,13 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                               const Column(
                                 children: [
                                   CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B7355)),
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF603d22)),
                                   ),
                                   SizedBox(height: 8),
                                   Text(
                                     'Loading points...',
                                     style: TextStyle(
-                                      color: Color(0xFF8B4513),
+                                      color: Color(0xFF603d22),
                                       fontSize: 14,
                                     ),
                                   ),
@@ -308,14 +308,14 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                 children: [
                                   const Icon(
                                     Icons.error_outline,
-                                    color: Color(0xFF8B4513),
+                                    color: Color(0xFF603d22),
                                     size: 32,
                                   ),
                                   const SizedBox(height: 8),
                                   const Text(
                                     'Unable to load points',
                                     style: TextStyle(
-                                      color: Color(0xFF8B4513),
+                                      color: Color(0xFF603d22),
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -325,7 +325,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                     onPressed: user?.id != null ? () => pointsProvider.refreshUserPoints(user!.id!) : null,
                                     child: const Text(
                                       'Retry',
-                                      style: TextStyle(color: Color(0xFF8B4513)),
+                                      style: TextStyle(color: Color(0xFF603d22)),
                                     ),
                                   ),
                                 ],
@@ -339,7 +339,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                       Text(
                                         '$currentPoints',
                                         style: const TextStyle(
-                                          color: Color(0xFF2F1B14),
+                                          color: Color(0xFF603d22),
                                           fontSize: 32,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -347,7 +347,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                       const Text(
                                         'Current Points',
                                         style: TextStyle(
-                                          color: Color(0xFF8B4513),
+                                          color: Color(0xFF603d22),
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -364,7 +364,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                       Text(
                                         '$freeRewards',
                                         style: const TextStyle(
-                                          color: Color(0xFF2F1B14),
+                                          color: Color(0xFF603d22),
                                           fontSize: 32,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -372,7 +372,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                                       Text(
                                         'Free Rewards',
                                         style: TextStyle(
-                                          color: Color(0xFF8B4513),
+                                          color: Color(0xFF603d22),
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -473,7 +473,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
           children: [
             Icon(
               icon,
-              color: isDestructive ? Colors.red : const Color(0xFF8B4513),
+              color: isDestructive ? Colors.red : const Color(0xFF603d22),
               size: 24,
             ),
             const SizedBox(width: 16),
@@ -481,7 +481,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
               child: Text(
                 title,
                 style: TextStyle(
-                  color: isDestructive ? Colors.red : const Color(0xFF2F1B14),
+                  color: isDestructive ? Colors.red : const Color(0xFF603d22),
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -721,7 +721,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: const Color(0xFF5D4037),
+        backgroundColor: const Color(0xFF603d22),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -752,7 +752,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF5D4037),
+                color: Color(0xFF603d22),
               ),
             ),
             const SizedBox(height: 24),
@@ -763,7 +763,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF5D4037),
+                color: Color(0xFF603d22),
               ),
             ),
             const SizedBox(height: 8),
@@ -773,11 +773,11 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 hintText: 'Enter your display name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF5D4037)),
+                  borderSide: const BorderSide(color: Color(0xFF603d22)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF5D4037), width: 2),
+                  borderSide: const BorderSide(color: Color(0xFF603d22), width: 2),
                 ),
               ),
             ),
@@ -809,7 +809,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _saveProfile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5D4037),
+                    backgroundColor: const Color(0xFF603d22),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
