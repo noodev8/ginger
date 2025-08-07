@@ -83,10 +83,20 @@ class AuthService {
       const authToken = this.generateToken(user);
       const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
 
-      // Update user with auth token
+      // Store token in user_tokens table (same as login process)
       await database.query(
-        'UPDATE app_user SET auth_token = $1, auth_token_expires = $2, last_active_at = NOW() WHERE id = $3',
-        [authToken, expiresAt, user.id]
+        `INSERT INTO user_tokens (user_id, token, expires_at, created_at)
+         VALUES ($1, $2, $3, NOW())
+         ON CONFLICT (user_id, token) DO UPDATE SET
+         expires_at = EXCLUDED.expires_at,
+         last_used_at = NOW()`,
+        [user.id, authToken, expiresAt]
+      );
+
+      // Update user last active time
+      await database.query(
+        'UPDATE app_user SET last_active_at = NOW() WHERE id = $1',
+        [user.id]
       );
 
       // Create loyalty points record

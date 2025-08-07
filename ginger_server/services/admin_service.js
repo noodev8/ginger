@@ -132,6 +132,89 @@ class AdminService {
       throw error;
     }
   }
+
+  /**
+   * Add a user as a staff member by email
+   * @param {string} email - Email of the user to make staff
+   * @returns {Object} Updated staff member data
+   */
+  async addStaffMember(email) {
+    try {
+      console.log(`[AdminService] Adding staff member: ${email}`);
+
+      // First, check if user exists
+      const userQuery = `
+        SELECT id, email, display_name, staff, staff_admin
+        FROM app_user
+        WHERE email = $1
+      `;
+
+      const userResult = await database.query(userQuery, [email]);
+
+      if (userResult.rows.length === 0) {
+        throw new Error('User not found with that email address');
+      }
+
+      const user = userResult.rows[0];
+
+      if (user.staff) {
+        throw new Error('User is already a staff member');
+      }
+
+      // Update user to be staff
+      const updateQuery = `
+        UPDATE app_user
+        SET staff = true, last_active_at = NOW()
+        WHERE id = $1
+        RETURNING id, email, phone, display_name, created_at, last_active_at, staff_admin, email_verified
+      `;
+
+      const updateResult = await database.query(updateQuery, [user.id]);
+
+      console.log(`[AdminService] Successfully added staff member: ${email}`);
+      return updateResult.rows[0];
+    } catch (error) {
+      console.error('[AdminService] Error adding staff member:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove staff privileges from a user
+   * @param {number} staffId - ID of the staff member to remove
+   */
+  async removeStaffMember(staffId) {
+    try {
+      console.log(`[AdminService] Removing staff member ID: ${staffId}`);
+
+      // First, check if staff member exists
+      const staffQuery = `
+        SELECT id, email, staff
+        FROM app_user
+        WHERE id = $1 AND staff = true
+      `;
+
+      const staffResult = await database.query(staffQuery, [staffId]);
+
+      if (staffResult.rows.length === 0) {
+        throw new Error('Staff member not found');
+      }
+
+      // Update user to remove staff privileges
+      const updateQuery = `
+        UPDATE app_user
+        SET staff = false, staff_admin = false
+        WHERE id = $1
+      `;
+
+      await database.query(updateQuery, [staffId]);
+
+      console.log(`[AdminService] Successfully removed staff member ID: ${staffId}`);
+    } catch (error) {
+      console.error('[AdminService] Error removing staff member:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new AdminService();

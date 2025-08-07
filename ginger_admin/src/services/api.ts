@@ -188,6 +188,25 @@ export const adminApi = {
     }
     throw new Error(data.message || 'Failed to delete reward');
   },
+
+  // Staff management
+  addStaffMember: async (email: string): Promise<Staff> => {
+    const response = await api.post('/admin/staff', { email });
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.staff;
+    }
+    throw new Error(data.message || 'Failed to add staff member');
+  },
+
+  removeStaffMember: async (staffId: number): Promise<void> => {
+    const response = await api.delete(`/admin/staff/${staffId}`);
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return;
+    }
+    throw new Error(data.message || 'Failed to remove staff member');
+  },
 };
 
 // Response interceptor for handling auth errors

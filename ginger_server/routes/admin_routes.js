@@ -34,6 +34,102 @@ router.get('/staff', authenticateToken, requireStaffAdmin, async (req, res) => {
 
 /*
 =======================================================================================================================================
+API Route: /admin/staff
+=======================================================================================================================================
+Method: POST
+Purpose: Add a user as a staff member by email (admin only)
+=======================================================================================================================================
+*/
+router.post('/staff', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        return_code: 'INVALID_DATA',
+        message: 'Email address is required'
+      });
+    }
+
+    console.log(`[AdminRoutes] Adding staff member: ${email}`);
+
+    const staff = await adminService.addStaffMember(email.trim());
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Staff member added successfully',
+      staff: staff
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error adding staff member:', error);
+
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        return_code: 'USER_NOT_FOUND',
+        message: 'No user found with that email address'
+      });
+    }
+
+    if (error.message.includes('already a staff')) {
+      return res.status(400).json({
+        return_code: 'ALREADY_STAFF',
+        message: 'User is already a staff member'
+      });
+    }
+
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /admin/staff/:id
+=======================================================================================================================================
+Method: DELETE
+Purpose: Remove staff privileges from a user (admin only)
+=======================================================================================================================================
+*/
+router.delete('/staff/:id', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        return_code: 'INVALID_DATA',
+        message: 'Valid staff ID is required'
+      });
+    }
+
+    console.log(`[AdminRoutes] Removing staff member ID: ${id}`);
+
+    await adminService.removeStaffMember(parseInt(id));
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Staff member removed successfully'
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error removing staff member:', error);
+
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        return_code: 'STAFF_NOT_FOUND',
+        message: 'Staff member not found'
+      });
+    }
+
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
 API Route: /admin/analytics
 =======================================================================================================================================
 Method: GET

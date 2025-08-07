@@ -128,20 +128,10 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF6F2), // Same as main screen background
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF603d22), // Coffee brown
-        foregroundColor: Colors.white,
-        title: const Text(
-          'My Account',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        elevation: 0,
-      ),
       body: SafeArea(
-        child: RefreshIndicator(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: RefreshIndicator(
           onRefresh: () async {
             _refreshPoints();
           },
@@ -442,6 +432,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
             ],
             ),
           ),
+        ),
         ),
       ),
     );

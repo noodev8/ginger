@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
         )}
 
         {activeTab === 'staff' && (
-          <StaffList staff={dashboardData.staff} />
+          <StaffList staff={dashboardData.staff} onStaffUpdate={loadDashboardData} />
         )}
 
         {activeTab === 'analytics' && (
