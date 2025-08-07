@@ -82,7 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ],
         ),
-        backgroundColor: isError ? Colors.red.shade600 : const Color(0xFF8B7355),
+        backgroundColor: isError ? Colors.red.shade600 : const Color(0xFF603d22),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -96,9 +96,9 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7EDE4),
+      backgroundColor: const Color(0xFFFAF6F2), // Cream / Light latte background
       appBar: AppBar(
-        backgroundColor: const Color(0xFF8B7355),
+        backgroundColor: const Color(0xFF603d22),
         foregroundColor: Colors.white,
         title: const Text(
           'Create Account',
@@ -109,68 +109,81 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         elevation: 0,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header with gradient
-              Container(
-                width: double.infinity,
-                height: 120,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFA0956B),
-                      Color(0xFFC4B896),
-                      Color(0x80C4B896),
-                      Color(0x00F7EDE4),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFAF6F2), // Cream / Light latte
+              Color(0xFFFFFFFF), // Pure white fade
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Header with Logo Text
+                Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/logotext.png',
+                        height: 100,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Join DailyStamp',
+                        style: TextStyle(
+                          color: Color(0xFF603d22),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        'Start earning rewards today',
+                        style: TextStyle(
+                          color: Color(0xFF8B7355),
+                          fontSize: 16,
+                        ),
+                      ),
                     ],
-                    stops: [0, 0.4, 0.8, 1],
-                    begin: AlignmentDirectional(0, -1),
-                    end: AlignmentDirectional(0, 1),
                   ),
                 ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Join Ginger & Co',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Start earning rewards today',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
-              // Registration Form
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 10,
-                        color: Color(0x1A000000),
-                        offset: Offset(0.0, 5),
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
+                // Registration Form
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: const Color(0x33603d22), // 20% opacity
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 8,
+                          color: const Color(0x1A603d22), // 10% opacity
+                          offset: const Offset(0.0, 4),
+                        ),
+                        const BoxShadow(
+                          blurRadius: 2,
+                          color: Color(0xFFE0E0E0),
+                          offset: Offset(0.0, 1),
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -178,7 +191,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text(
                             'Create Your Account',
                             style: TextStyle(
-                              color: Color(0xFF2F1B14),
+                              color: Color(0xFF603d22),
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -199,7 +212,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
+                                  color: Color(0xFF603d22),
                                   width: 2,
                                 ),
                               ),
@@ -228,7 +241,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
+                                  color: Color(0xFF603d22),
                                   width: 2,
                                 ),
                               ),
@@ -260,7 +273,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
+                                  color: Color(0xFF603d22),
                                   width: 2,
                                 ),
                               ),
@@ -293,7 +306,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
+                                  color: Color(0xFF603d22),
                                   width: 2,
                                 ),
                               ),
@@ -335,7 +348,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(
-                                  color: Color(0xFF8B7355),
+                                  color: Color(0xFF603d22),
                                   width: 2,
                                 ),
                               ),
@@ -359,7 +372,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               return ElevatedButton(
                                 onPressed: authProvider.isLoading ? null : _handleRegister,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF8B7355),
+                                  backgroundColor: const Color(0xFF603d22),
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
@@ -392,7 +405,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               const Text(
                                 'Already have an account? ',
                                 style: TextStyle(
-                                  color: Color(0xFF8B4513),
+                                  color: Color(0xFF8B7355),
                                   fontSize: 14,
                                 ),
                               ),
@@ -403,7 +416,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: const Text(
                                   'Sign in',
                                   style: TextStyle(
-                                    color: Color(0xFF8B7355),
+                                    color: Color(0xFF603d22),
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
@@ -417,8 +430,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

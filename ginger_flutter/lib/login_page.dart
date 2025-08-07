@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
-        backgroundColor: isError ? Colors.red.shade600 : const Color(0xFF8B7355),
+        backgroundColor: isError ? Colors.red.shade600 : const Color(0xFF603d22),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -108,32 +108,28 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7EDE4),
+      backgroundColor: const Color(0xFFFAF6F2), // Cream / Light latte background
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Header with gradient
+              // Header with Logo Text
               Container(
                 width: double.infinity,
                 height: 200,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xFFA0956B),
-                      Color(0xFFC4B896),
-                      Color(0x80C4B896),
-                      Color(0x00F7EDE4),
+                      Color(0xFFFAF6F2), // Cream / Light latte
+                      Color(0xFFFFFFFF), // Pure white fade
                     ],
-                    stops: [0, 0.4, 0.8, 1],
-                    begin: AlignmentDirectional(0, -1),
-                    end: AlignmentDirectional(0, 1),
                   ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo Text
                     Image.asset(
                       'assets/logotext.png',
                       height: 100,
@@ -143,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Text(
                       'Welcome Back',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF603d22),
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
@@ -151,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Text(
                       'Sign in to your account',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Color(0xFF8B7355),
                         fontSize: 16,
                       ),
                     ),
@@ -166,14 +162,23 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: const [
+                    border: Border.all(
+                      color: const Color(0x33603d22), // 20% opacity
+                      width: 1,
+                    ),
+                    boxShadow: [
                       BoxShadow(
-                        blurRadius: 10,
-                        color: Color(0x1A000000),
-                        offset: Offset(0.0, 5),
+                        blurRadius: 8,
+                        color: const Color(0x1A603d22), // 10% opacity
+                        offset: const Offset(0.0, 4),
+                      ),
+                      const BoxShadow(
+                        blurRadius: 2,
+                        color: Color(0xFFE0E0E0),
+                        offset: Offset(0.0, 1),
                       )
                     ],
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -185,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                           const Text(
                             'Login',
                             style: TextStyle(
-                              color: Color(0xFF2F1B14),
+                              color: Color(0xFF603d22),
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -210,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
-                                      color: hasError ? Colors.red : const Color(0xFF8B7355),
+                                      color: hasError ? Colors.red : const Color(0xFF603d22),
                                       width: 2,
                                     ),
                                   ),
@@ -263,7 +268,7 @@ class _LoginPageState extends State<LoginPage> {
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
-                                      color: hasError ? Colors.red : const Color(0xFF8B7355),
+                                      color: hasError ? Colors.red : const Color(0xFF603d22),
                                       width: 2,
                                     ),
                                   ),
@@ -331,7 +336,7 @@ class _LoginPageState extends State<LoginPage> {
                               return ElevatedButton(
                                 onPressed: authProvider.isLoading ? null : _handleLogin,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF8B7355),
+                                  backgroundColor: const Color(0xFF603d22),
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
@@ -364,7 +369,7 @@ class _LoginPageState extends State<LoginPage> {
                               const Text(
                                 "Don't have an account? ",
                                 style: TextStyle(
-                                  color: Color(0xFF8B4513),
+                                  color: Color(0xFF8B7355),
                                   fontSize: 14,
                                 ),
                               ),
@@ -380,7 +385,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: const Text(
                                   'Sign up',
                                   style: TextStyle(
-                                    color: Color(0xFF8B7355),
+                                    color: Color(0xFF603d22),
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
