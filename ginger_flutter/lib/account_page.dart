@@ -47,6 +47,9 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
     final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
+    // Refresh user data to get updated staff status
+    authProvider.refreshCurrentUser();
+
     if (user?.id != null) {
       pointsProvider.refreshUserPoints(user!.id!);
     }

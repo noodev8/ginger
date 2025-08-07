@@ -55,6 +55,8 @@ class _RewardsPageState extends State<RewardsPage> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<AuthProvider, PointsProvider, RewardProvider>(
@@ -136,22 +138,22 @@ class _RewardsPageState extends State<RewardsPage> {
                   ),
                 )
               : SingleChildScrollView(
-        child: Column(
-          children: [
-            // Logo Header
-            Padding(
-              padding: const EdgeInsets.only(top: 40, bottom: 8),
-              child: Image.asset(
-                'assets/logotext.png',
-                height: 80,
-                fit: BoxFit.contain,
-              ),
-            ),
+                  child: Column(
+                      children: [
+                        // Logo Header
+                        Padding(
+                          padding: const EdgeInsets.only(top: 40, bottom: 8),
+                          child: Image.asset(
+                            'assets/logotext.png',
+                            height: 80,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
 
-            // Points Display with Refresh Button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(60, 16, 60, 24),
-              child: Column(
+                        // Points Display with Refresh Button
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(60, 16, 60, 24),
+                          child: Column(
                 children: [
                   // Coffee beans and points display
                   SizedBox(
@@ -819,11 +821,11 @@ class _RewardsPageState extends State<RewardsPage> {
 
 
           ],
-                    ),
                   ),
-                );
-    },
-  );
+                ), // Close SingleChildScrollView
+        ); // Close Scaffold
+      },
+    ); // Close Consumer3
 }
 
   void _showQRCode(BuildContext context, int userId) {

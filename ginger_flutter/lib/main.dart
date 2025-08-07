@@ -244,6 +244,9 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     final rewardProvider = Provider.of<RewardProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
+    // Refresh user data to get updated staff status
+    authProvider.refreshCurrentUser();
+
     if (user?.id != null) {
       pointsProvider.refreshUserPoints(user!.id!);
     }

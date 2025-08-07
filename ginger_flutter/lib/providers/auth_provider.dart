@@ -25,6 +25,30 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refresh current user data from server
+  /// Returns true on success, false on failure
+  Future<bool> refreshCurrentUser() async {
+    if (_currentUser?.authToken == null) {
+      return false;
+    }
+
+    try {
+      final refreshedUser = await _authService.validateStoredToken();
+      if (refreshedUser != null) {
+        _currentUser = refreshedUser;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to refresh user data: $e');
+      }
+      // If token validation fails, user might need to re-login
+      return false;
+    }
+  }
+
   /// Login user
   /// Returns true on success, false on failure
   /// Check lastError for specific error message
