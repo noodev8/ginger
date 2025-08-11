@@ -153,6 +153,15 @@ export const adminApi = {
     throw new Error(data.message || 'Failed to fetch rewards');
   },
 
+  getAllRewards: async (): Promise<Reward[]> => {
+    const response = await api.get('/admin/rewards?include_inactive=true');
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.rewards;
+    }
+    throw new Error(data.message || 'Failed to fetch all rewards');
+  },
+
   createReward: async (name: string, description: string, pointsRequired: number): Promise<Reward> => {
     const response = await api.post('/admin/rewards', {
       name,
@@ -187,6 +196,15 @@ export const adminApi = {
       return data.reward;
     }
     throw new Error(data.message || 'Failed to delete reward');
+  },
+
+  reactivateReward: async (id: number): Promise<Reward> => {
+    const response = await api.put(`/admin/rewards/${id}/reactivate`);
+    const data = response.data as any;
+    if (data.return_code === 'SUCCESS') {
+      return data.reward;
+    }
+    throw new Error(data.message || 'Failed to reactivate reward');
   },
 
   // Staff management

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -23,12 +23,16 @@ import {
   Switch,
   Alert,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   EmojiEvents as RewardIcon,
+  Restore as RestoreIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
 } from '@mui/icons-material';
 import { adminApi, Reward } from '../services/api';
 
@@ -47,23 +51,24 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
     is_active: true,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
 
-  useEffect(() => {
-    loadRewards();
-  }, []);
-
-  const loadRewards = async () => {
+  const loadRewards = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await adminApi.getRewards();
+      const data = showInactive ? await adminApi.getAllRewards() : await adminApi.getRewards();
       setRewards(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load rewards');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showInactive]);
+
+  useEffect(() => {
+    loadRewards();
+  }, [loadRewards]);
 
   const handleOpenDialog = (reward?: Reward) => {
     if (reward) {
@@ -150,7 +155,10 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
   };
 
   const handleDelete = async (reward: Reward) => {
-    if (!window.confirm(`Are you sure you want to delete "${reward.name}"?`)) {
+    if (!window.confirm(
+      `Are you sure you want to delete "${reward.name}"?\n\n` +
+      `This will remove it from the admin dashboard but preserve all redemption history for reporting purposes.`
+    )) {
       return;
     }
 
@@ -165,6 +173,36 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
 
       if (err.response?.status === 404) {
         errorMessage = 'Reward not found. It may have already been deleted.';
+        // Refresh the list to show current state
+        await loadRewards();
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Session expired. Please refresh the page and try again.';
+      } else if (err.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again in a moment.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+    }
+  };
+
+  const handleReactivate = async (reward: Reward) => {
+    if (!window.confirm(`Are you sure you want to reactivate "${reward.name}"?`)) {
+      return;
+    }
+
+    try {
+      setError('');
+      await adminApi.reactivateReward(reward.id);
+      await loadRewards();
+    } catch (err: any) {
+      console.error('Error reactivating reward:', err);
+
+      let errorMessage = 'Failed to reactivate reward';
+
+      if (err.response?.status === 404) {
+        errorMessage = 'Reward not found. It may have already been reactivated.';
         // Refresh the list to show current state
         await loadRewards();
       } else if (err.response?.status === 401) {
@@ -206,13 +244,23 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
                 Manage Rewards
               </Typography>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => handleOpenDialog()}
-            >
-              Add Reward
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={showInactive ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                onClick={() => setShowInactive(!showInactive)}
+                size="small"
+              >
+                {showInactive ? 'Hide Inactive' : 'Show Inactive'}
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpenDialog()}
+              >
+                Add Reward
+              </Button>
+            </Box>
           </Box>
 
           {error && (
@@ -283,13 +331,27 @@ const ManageRewards: React.FC<ManageRewardsProps> = () => {
                         >
                           <EditIcon />
                         </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDelete(reward)}
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
+                        {reward.is_active ? (
+                          <Tooltip title="Remove from dashboard (preserves redemption history)">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDelete(reward)}
+                              color="error"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Reactivate reward">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleReactivate(reward)}
+                              color="success"
+                            >
+                              <RestoreIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))

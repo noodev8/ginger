@@ -231,9 +231,12 @@ Purpose: Get all rewards (including inactive ones) for admin management
 */
 router.get('/rewards', authenticateToken, requireStaffAdmin, async (req, res) => {
   try {
-    console.log('[AdminRoutes] Getting all rewards for management');
+    const includeInactive = req.query.include_inactive === 'true';
+    console.log(`[AdminRoutes] Getting rewards for management (include_inactive: ${includeInactive})`);
 
-    const rewards = await rewardService.getAllRewards();
+    const rewards = includeInactive
+      ? await rewardService.getAllRewardsIncludingInactive()
+      : await rewardService.getAllRewards();
 
     res.json({
       return_code: 'SUCCESS',
@@ -374,7 +377,7 @@ router.put('/rewards/:id', authenticateToken, requireStaffAdmin, async (req, res
 API Route: /admin/rewards/:id
 =======================================================================================================================================
 Method: DELETE
-Purpose: Delete (deactivate) a reward
+Purpose: Delete (deactivate) a reward while preserving redemption history
 =======================================================================================================================================
 */
 router.delete('/rewards/:id', authenticateToken, requireStaffAdmin, async (req, res) => {
@@ -399,6 +402,43 @@ router.delete('/rewards/:id', authenticateToken, requireStaffAdmin, async (req, 
     });
   } catch (error) {
     console.error('[AdminRoutes] Error deleting reward:', error);
+    res.status(500).json({
+      return_code: 'ERROR',
+      message: 'Internal server error'
+    });
+  }
+});
+
+/*
+=======================================================================================================================================
+API Route: /admin/rewards/:id/reactivate
+=======================================================================================================================================
+Method: PUT
+Purpose: Reactivate a previously deleted (inactive) reward
+=======================================================================================================================================
+*/
+router.put('/rewards/:id/reactivate', authenticateToken, requireStaffAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(`[AdminRoutes] Reactivating reward ID: ${id}`);
+
+    const reward = await rewardService.reactivateReward(parseInt(id));
+
+    if (!reward) {
+      return res.status(404).json({
+        return_code: 'NOT_FOUND',
+        message: 'Reward not found'
+      });
+    }
+
+    res.json({
+      return_code: 'SUCCESS',
+      message: 'Reward reactivated successfully',
+      reward: reward
+    });
+  } catch (error) {
+    console.error('[AdminRoutes] Error reactivating reward:', error);
     res.status(500).json({
       return_code: 'ERROR',
       message: 'Internal server error'

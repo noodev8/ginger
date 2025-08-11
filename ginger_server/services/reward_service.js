@@ -93,21 +93,42 @@ class RewardService {
   }
 
   /**
-   * Get all rewards (including inactive ones) - Admin only
+   * Get active rewards for admin dashboard - Admin only
+   * This excludes deleted (inactive) rewards from the admin interface
    */
   async getAllRewards() {
     try {
-      console.log('[REWARD_SERVICE] Getting all rewards for admin');
+      console.log('[REWARD_SERVICE] Getting active rewards for admin dashboard');
+
+      const result = await database.query(
+        'SELECT * FROM rewards WHERE is_active = true ORDER BY points_required ASC, created_at DESC',
+        []
+      );
+
+      console.log(`[REWARD_SERVICE] Found ${result.rows.length} active rewards for admin`);
+      return result.rows;
+    } catch (error) {
+      console.error('[REWARD_SERVICE] Get active rewards for admin error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all rewards including inactive ones - for reporting/analytics
+   */
+  async getAllRewardsIncludingInactive() {
+    try {
+      console.log('[REWARD_SERVICE] Getting all rewards including inactive');
 
       const result = await database.query(
         'SELECT * FROM rewards ORDER BY points_required ASC, created_at DESC',
         []
       );
 
-      console.log(`[REWARD_SERVICE] Found ${result.rows.length} total rewards`);
+      console.log(`[REWARD_SERVICE] Found ${result.rows.length} total rewards (including inactive)`);
       return result.rows;
     } catch (error) {
-      console.error('[REWARD_SERVICE] Get all rewards error:', error.message);
+      console.error('[REWARD_SERVICE] Get all rewards including inactive error:', error.message);
       throw error;
     }
   }
@@ -196,6 +217,7 @@ class RewardService {
 
   /**
    * Delete (deactivate) a reward - Admin only
+   * Note: This preserves redemption history while hiding the reward from admin interface
    */
   async deleteReward(rewardId) {
     try {
@@ -207,7 +229,7 @@ class RewardService {
       );
 
       if (result.rows.length > 0) {
-        console.log(`[REWARD_SERVICE] Deactivated reward: ${result.rows[0].name}`);
+        console.log(`[REWARD_SERVICE] Deactivated reward: ${result.rows[0].name} (preserving redemption history)`);
         return result.rows[0];
       } else {
         console.log(`[REWARD_SERVICE] Reward not found for deletion: ${rewardId}`);
@@ -215,6 +237,31 @@ class RewardService {
       }
     } catch (error) {
       console.error('[REWARD_SERVICE] Delete reward error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Reactivate a reward - Admin only
+   */
+  async reactivateReward(rewardId) {
+    try {
+      console.log(`[REWARD_SERVICE] Reactivating reward ID: ${rewardId}`);
+
+      const result = await database.query(
+        'UPDATE rewards SET is_active = true, updated_at = NOW() WHERE id = $1 RETURNING *',
+        [rewardId]
+      );
+
+      if (result.rows.length > 0) {
+        console.log(`[REWARD_SERVICE] Reactivated reward: ${result.rows[0].name}`);
+        return result.rows[0];
+      } else {
+        console.log(`[REWARD_SERVICE] Reward not found for reactivation: ${rewardId}`);
+        return null;
+      }
+    } catch (error) {
+      console.error('[REWARD_SERVICE] Reactivate reward error:', error.message);
       throw error;
     }
   }
