@@ -398,7 +398,7 @@ class _AccountPageState extends State<AccountPage> with WidgetsBindingObserver {
                       icon: Icons.help_outline,
                       title: 'Help & Support',
                       onTap: () {
-                        _launchURL('https://www.noodev8.com/contact/');
+                        _launchURL('https://www.noodev8.com/contact.html');
                       },
                     ),
                     const SizedBox(height: 12),
